@@ -36,8 +36,7 @@ export default class MailRepository {
         let query = {userId: userid};
         let newRecord = {$set: {userId: userid, mail: mail}};
 
-
-        collections.userModel.updateOne(query, newRecord).then(r => r).cache(e => e)
+        await collections.userModel.updateOne(query, newRecord);
 
     }
 }
