@@ -16,5 +16,3 @@ logs
 # ngrok tunnel file
 config/tunnel.pid
 
-# webpack build output
-dist/
