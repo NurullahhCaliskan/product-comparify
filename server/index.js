@@ -278,15 +278,15 @@ export async function createServer(
   });
 
   app.get("/customers-data_request", async (req, res) => {
-    return res.status(422).send(JSON.stringify({ result: "success" }));
+    return res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
   app.get("/customers-redact", async (req, res) => {
-    return res.status(422).send(JSON.stringify({ result: "success" }));
+    return res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
   app.get("/shop-redact", async (req, res) => {
-    return res.status(422).send(JSON.stringify({ result: "success" }));
+    return res.status(200).send(JSON.stringify({ result: "success" }));
   });
   app.use(express.json());
 
