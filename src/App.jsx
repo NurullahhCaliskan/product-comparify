@@ -17,26 +17,23 @@ import "@shopify/polaris/build/esm/styles.css";
 import { HomePage } from "./components/HomePage";
 import { EmptyStatePage } from "./components/EmptyStatePage";
 
-
 export default function App() {
-    return (
-        <PolarisProvider i18n={translations}>
-            <AppBridgeProvider
-                config={{
-                    apiKey: process.env.SHOPIFY_API_KEY,
-                    host: new URL(location).searchParams.get("host"),
-                    forceRedirect: true,
-
-                }}
-            >
-                <MyProvider>
-                    <HomePage />
-                </MyProvider>
-            </AppBridgeProvider>
-        </PolarisProvider>
-    );
+  return (
+    <PolarisProvider i18n={translations}>
+      <AppBridgeProvider
+        config={{
+          apiKey: process.env.SHOPIFY_API_KEY,
+          host: new URL(location).searchParams.get("host"),
+          forceRedirect: true,
+        }}
+      >
+        <MyProvider>
+          <HomePage />
+        </MyProvider>
+      </AppBridgeProvider>
+    </PolarisProvider>
+  );
 }
-
 
 function MyProvider({ children }) {
   const app = useAppBridge();
@@ -56,7 +53,6 @@ export function userLoggedInFetch(app) {
   const fetchFunction = authenticatedFetch(app);
 
   return async (uri, options) => {
-
     const response = await fetchFunction(uri, options);
     if (
       response.headers.get("X-Shopify-API-Request-Failure-Reauthorize") === "1"
