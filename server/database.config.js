@@ -6,7 +6,9 @@ export  let collections = {
     websitesModel: null,
     productHistoryModel: null,
     userModel: null,
-    userSessionModel: null
+    userSessionModel: null,
+    mailHistoryModel: null,
+    contactSupportModel: null
 }
 
 

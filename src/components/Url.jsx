@@ -129,8 +129,6 @@ export function Url() {
 
                     <Card sectioned>
                         <FormLayout>
-
-
                             <TextField
                                 label="Url"
                                 value={urlFieldValue}

@@ -9,13 +9,15 @@ import { Url } from "./Url.jsx";
 import { Email } from "./Email.jsx";
 import { Alarm } from "./Alarm.jsx";
 import favicon from '../assets/favicon.png';
+import { useAppBridge } from "@shopify/app-bridge-react";
+import { userLoggedInFetch } from "../App.jsx";
 
 
 export function HomePage() {
-    const defaultState = useRef({
-        emailFieldValue: 'dharma@jadedpixel.com',
-        nameFieldValue: 'Jaded Pixel',
-    });
+    const app = useAppBridge();
+    const fetch = userLoggedInFetch(app);
+
+
     const skipToContentRef = useRef(null);
     const [frameIndex, setFrameIndex] = useState(0)
     const [toastActive, setToastActive] = useState(false);
@@ -24,15 +26,9 @@ export function HomePage() {
     const [userMenuActive, setUserMenuActive] = useState(false);
     const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
     const [modalActive, setModalActive] = useState(false);
-    const [nameFieldValue, setNameFieldValue] = useState(
-        defaultState.current.nameFieldValue,
-    );
-    const [emailFieldValue, setEmailFieldValue] = useState(
-        defaultState.current.emailFieldValue,
-    );
-    const [storeName, setStoreName] = useState(
-        defaultState.current.nameFieldValue,
-    );
+
+
+
     const [supportSubject, setSupportSubject] = useState('');
     const [supportMessage, setSupportMessage] = useState('');
 
@@ -44,19 +40,7 @@ export function HomePage() {
         (value) => setSupportMessage(value),
         [],
     );
-    const handleDiscard = useCallback(() => {
-        setEmailFieldValue(defaultState.current.emailFieldValue);
-        setNameFieldValue(defaultState.current.nameFieldValue);
-        setIsDirty(false);
-    }, []);
-    const handleSave = useCallback(() => {
-        defaultState.current.nameFieldValue = nameFieldValue;
-        defaultState.current.emailFieldValue = emailFieldValue;
 
-        setIsDirty(false);
-        setToastActive(true);
-        setStoreName(defaultState.current.nameFieldValue);
-    }, [emailFieldValue, nameFieldValue]);
 
 
     const toggleToastActive = useCallback(
@@ -96,33 +80,25 @@ export function HomePage() {
         },
     ];
 
-    const contextualSaveBarMarkup = isDirty ? (
-        <ContextualSaveBar
-            message="Unsaved changes"
-            saveAction={{
-                onAction: handleSave,
-            }}
-            discardAction={{
-                onAction: handleDiscard,
-            }}
-        />
-    ) : null;
+    const saveContactSupport = async () => {
+        if (supportSubject && supportMessage) {
 
-    const userMenuMarkup = (
-        <TopBar.UserMenu
-            actions={userMenuActions}
-            name="Dharma"
-            detail={storeName}
-            initials="D"
-            open={userMenuActive}
-            onToggle={toggleUserMenuActive}
-        />
-    );
+            const count = await fetch("/contact-support", {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({subject: supportSubject, message: supportMessage})
+            }).then((res) => res.json());
+
+            setToastActive(true)
+
+        }
+
+        setModalActive(!modalActive)
+
+    }
 
     const topBarMarkup = (
         <TopBar
             showNavigationToggle
-            userMenu={userMenuMarkup}
             searchResultsVisible={false}
             searchField={false}
             searchResults={false}
@@ -168,6 +144,7 @@ export function HomePage() {
         </Navigation>
     );
 
+
     const loadingMarkup = isLoading ? <Loading/> : null;
 
     const actualPageMarkup = (
@@ -202,7 +179,7 @@ export function HomePage() {
             title="Contact support"
             primaryAction={{
                 content: 'Send',
-                onAction: toggleModalActive,
+                onAction:  () => saveContactSupport() ,
             }}
         >
             <Modal.Section>
@@ -236,7 +213,7 @@ export function HomePage() {
     };
 
     return (
-        <div  >
+        <div>
             <AppProvider
                 i18n={{
                     Polaris: {
@@ -278,7 +255,6 @@ export function HomePage() {
                     onNavigationDismiss={toggleMobileNavigationActive}
                     skipToContentTarget={skipToContentRef.current}
                 >
-                    {contextualSaveBarMarkup}
                     {loadingMarkup}
                     {pageMarkup}
                     {toastMarkup}

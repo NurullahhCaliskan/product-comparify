@@ -26,4 +26,5 @@ export default class MailService {
         return await mailRepository.getMailByUserid(userid);
 
     }
+
 }

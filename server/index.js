@@ -6,8 +6,7 @@ import "dotenv/config";
 import SessionService from "./service/sessionService.js"
 import ScrapValidator from "./validate/scrapValidator.js"
 import bp from 'body-parser';
-import MongoClient from "mongodb"
-
+import axios from "axios";
 
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
@@ -18,6 +17,9 @@ import IsNotValidUrlException from "./exception/isNotValidUrlException.js";
 import { urlFormatter } from "./utility/stringUtility.js";
 import * as mongoDB from "mongodb";
 import { collections } from "./database.config.js";
+import UserService from "./service/userService.js";
+import ContactSupportService from "./service/contactSupportService.js";
+import MailHistoryService from "./service/mailHistoryService.js";
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -28,24 +30,21 @@ const isTest = process.env.NODE_ENV === "test" || !!process.env.VITE_TEST_BUILD;
 async function loadDb() {
     try {
 
-        console.log('start log')
-        console.log(process.env.DBHOST)
-
-        let client  = new mongoDB.MongoClient(process.env.DBHOST);
+        let client = new mongoDB.MongoClient(process.env.DBHOST);
 
         await client.connect();
 
-        console.log(process.env.DBNAME)
-        let db= client.db(process.env.DBNAME);
+        let db = client.db(process.env.DBNAME);
         collections.userWebsitesRelationModel = db.collection("user-websites-relation");
         collections.websitesModel = db.collection("websites");
         collections.productHistoryModel = db.collection("product-history");
         collections.userModel = db.collection("user");
         collections.userSessionModel = db.collection("user-session");
+        collections.mailHistoryModel = db.collection("mail-history");
+        collections.contactSupportModel = db.collection("contact-support");
 
         console.log('success load db2')
     } catch (e) {
-        console.log('hata')
         console.log(e)
     }
 
@@ -93,9 +92,7 @@ export async function createServer(
     app.post("/webhooks", async (req, res) => {
         try {
             await Shopify.Webhooks.Registry.process(req, res);
-            console.log(`Webhook processed, returned status code 200`);
         } catch (error) {
-            console.log(`Failed to process webhook: ${error}`);
             res.status(500).send(error.message);
         }
     });
@@ -110,13 +107,56 @@ export async function createServer(
         res.status(200).send(countData);
     });
 
+    app.get("/get-mail-history", verifyRequest(app), async (req, res) => {
+        let response = []
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+
+            let mailHistoryService = new MailHistoryService();
+
+            response = await mailHistoryService.getMailHistoryByUserid(session.id)
+        } catch (e) {
+            console.log(e)
+        }
+
+        res.status(200).send(JSON.stringify(response));
+    });
+
+    app.get("/send-test-mail", verifyRequest(app), async (req, res) => {
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+
+            let url = process.env.BACKENDURL + "/mail/test?id=" + session.id
+            let response = await axios.get(url)
+
+        } catch (e) {
+            console.log(e)
+        }
+
+        res.status(200).send(JSON.stringify({result: "success"}));
+    });
+
+    app.post("/contact-support", async (req, res) => {
+        console.log("contact-support")
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+
+            let body = req.body;
+
+            let contactSupportService = new ContactSupportService();
+
+            await contactSupportService.saveContactSupportService(session.id, body.subject, body.message)
+        } catch (e) {
+            console.log(e)
+        }
+        return res.status(200).send(JSON.stringify({data: 'New message inserted successfully'}));
+    })
+
     app.post("/user-crawl-url", async (req, res) => {
 
         let body = req.body;
-        body.url=urlFormatter(body.url)
+        body.url = urlFormatter(body.url)
 
-        console.log("new url")
-        console.log(body.url)
         const session = await Shopify.Utils.loadCurrentSession(req, res, true);
         try {
 
@@ -125,12 +165,11 @@ export async function createServer(
 
             let urlToScrapService = new UrlToScrapService();
             await urlToScrapService.isExistsUserToUrlRelation(body.url, session.id)
-            await  urlToScrapService.addUrlToScrapService(body.url, session.id)
+            await urlToScrapService.addUrlToScrapService(body.url, session.id)
 
         } catch (e) {
 
             if (e instanceof IsNotValidUrlException) {
-                console.log('IsNotValidUrlException2')
                 return res.status(422).send(e.message);
             }
             console.log(e);
@@ -146,7 +185,6 @@ export async function createServer(
 
         let body = req.body;
 
-        console.log(body)
         const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
         let urlToScrapService = new UrlToScrapService();
@@ -160,10 +198,8 @@ export async function createServer(
         } catch (e) {
 
             if (e instanceof IsNotValidUrlException) {
-                console.log('IsNotValidUrlException2')
                 return res.status(422).send(e.message);
             }
-            console.log(e);
             return res.status(422).send((e.message));
 
         }
@@ -173,7 +209,6 @@ export async function createServer(
 
 
     app.get("/user-mail", async (req, res) => {
-        console.log('get user mail')
         const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
         try {
@@ -188,7 +223,6 @@ export async function createServer(
     })
 
     app.delete("/user-crawl-url", async (req, res) => {
-        console.log('delete user-crawl-url')
 
         let id = req.query.id.trim().replaceAll('"', "")
         try {
@@ -202,7 +236,6 @@ export async function createServer(
     });
 
     app.post("/user-mail", verifyRequest(app), async (req, res) => {
-        console.log('post user mail')
         let body = req.body;
         const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
@@ -231,7 +264,6 @@ export async function createServer(
     });
 
     app.get("/login", verifyRequest(app), async (req, res) => {
-        console.log('login')
         const session = await Shopify.Utils.loadCurrentSession(req, res, true);
         let sessionService = new SessionService();
         sessionService.session(session)

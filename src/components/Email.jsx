@@ -11,7 +11,10 @@ export function Email() {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
 
+    const [loadingUrl, setLoadingUrl] = useState(false);
+
     const getUrlList = async () => {
+        setLoadingUrl(true)
 
         const response = await fetch("/user-mail").then((res) => res.json());
 
@@ -22,6 +25,8 @@ export function Email() {
         if (response?.mail) {
             setEmailFieldValue(response.mail);
         }
+
+        setLoadingUrl(false)
     }
 
     const defaultState = useRef({
@@ -45,7 +50,7 @@ export function Email() {
     const [isDirty, setIsDirty] = useState(false);
 
     const upsertEmail = async () => {
-
+        setLoadingUrl(true)
         const count = await fetch("/user-mail", {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({email: emailFieldValue})
@@ -67,9 +72,11 @@ export function Email() {
                     <FormLayout>
 
                         <TextField
+                            disabled={loadingUrl}
                             label="Email"
                             value={emailFieldValue}
                             onChange={handleUrlFieldChange}
+                            placeholder={"www.shopify.com"}
                         />
 
                         <Button onClick={() => upsertEmail()}> Save</Button>
@@ -78,4 +85,5 @@ export function Email() {
             </Layout.AnnotatedSection>
         </Layout>
     </Page>)
+
 }

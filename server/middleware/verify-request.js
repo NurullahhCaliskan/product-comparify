@@ -8,9 +8,7 @@ const TEST_GRAPHQL_QUERY = `
 }`;
 
 export default function verifyRequest(app, { returnHeader = true } = {}) {
-    console.log("verifyRequest")
   return async (req, res, next) => {
-        console.log("async (req, res, next)")
     const session = await Shopify.Utils.loadCurrentSession(
       req,
       res,
