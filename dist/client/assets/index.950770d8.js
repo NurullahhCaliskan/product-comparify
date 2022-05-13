@@ -40242,7 +40242,7 @@ For more information, please visit: https://go.apollo.dev/c/docs`)
       i18n: F$,
       children: _(Dr.Provider, {
         config: {
-          apiKey: "05ad0723db8739dcf4541842cf424e3e",
+          apiKey: "e7ff36fde2cac23c8cf5a8a81d0e1434",
           host: new URL(location).searchParams.get("host"),
           forceRedirect: !0,
         },
