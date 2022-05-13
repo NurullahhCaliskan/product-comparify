@@ -20,6 +20,7 @@ import { collections } from "./database.config.js";
 import UserService from "./service/userService.js";
 import ContactSupportService from "./service/contactSupportService.js";
 import MailHistoryService from "./service/mailHistoryService.js";
+import { Webhook } from "@shopify/shopify-api/dist/rest-resources/2022-04/index.js";
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -89,7 +90,7 @@ export async function createServer(
 
   applyAuthMiddleware(app);
 
-  app.post("/webhooks", async (req, res) => {
+  app.post("/webhooks", verifyRequest(app), async (req, res) => {
     try {
       await Shopify.Webhooks.Registry.process(req, res);
     } catch (error) {
@@ -136,7 +137,7 @@ export async function createServer(
     res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
-  app.post("/contact-support", async (req, res) => {
+  app.post("/contact-support", verifyRequest(app), async (req, res) => {
     console.log("contact-support");
     try {
       const session = await Shopify.Utils.loadCurrentSession(req, res, true);
@@ -158,7 +159,7 @@ export async function createServer(
       .send(JSON.stringify({ data: "New message inserted successfully" }));
   });
 
-  app.post("/user-crawl-url", async (req, res) => {
+  app.post("/user-crawl-url", verifyRequest(app), async (req, res) => {
     let body = req.body;
     body.url = urlFormatter(body.url);
 
@@ -183,7 +184,7 @@ export async function createServer(
       .send(JSON.stringify({ data: "New url inserted successfully" }));
   });
 
-  app.put("/user-crawl-url", async (req, res) => {
+  app.put("/user-crawl-url", verifyRequest(app), async (req, res) => {
     let body = req.body;
 
     const session = await Shopify.Utils.loadCurrentSession(req, res, true);
@@ -206,7 +207,7 @@ export async function createServer(
       .send(JSON.stringify({ data: "Url updated successfully" }));
   });
 
-  app.get("/user-mail", async (req, res) => {
+  app.get("/user-mail", verifyRequest(app), async (req, res) => {
     const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
     try {
@@ -218,7 +219,7 @@ export async function createServer(
     }
   });
 
-  app.delete("/user-crawl-url", async (req, res) => {
+  app.delete("/user-crawl-url", verifyRequest(app), async (req, res) => {
     let id = req.query.id.trim().replaceAll('"', "");
     try {
       let urlToScrapService = new UrlToScrapService();
@@ -252,7 +253,7 @@ export async function createServer(
       .send(JSON.stringify({ data: "Mail updated successfully" }));
   });
 
-  app.get("/user-crawl-url", async (req, res) => {
+  app.get("/user-crawl-url", verifyRequest(app), async (req, res) => {
     const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
     let urlToScrapService = new UrlToScrapService();
@@ -277,15 +278,15 @@ export async function createServer(
     }
   });
 
-  app.get("/customers-data_request", async (req, res) => {
+  app.get("/customers-data_request", verifyRequest(app), async (req, res) => {
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
-  app.get("/customers-redact", async (req, res) => {
+  app.get("/customers-redact", verifyRequest(app), async (req, res) => {
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
-  app.get("/shop-redact", async (req, res) => {
+  app.get("/shop-redact", verifyRequest(app), async (req, res) => {
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
   app.use(express.json());
