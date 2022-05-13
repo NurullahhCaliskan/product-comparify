@@ -158,7 +158,7 @@ export async function createServer(
       .send(JSON.stringify({ data: "New message inserted successfully" }));
   });
 
-  app.post("/user-crawl-url", async (req, res) => {
+  app.post("/user-crawl-url", verifyRequest(app), async (req, res) => {
     let body = req.body;
     body.url = urlFormatter(body.url);
 
@@ -183,7 +183,7 @@ export async function createServer(
       .send(JSON.stringify({ data: "New url inserted successfully" }));
   });
 
-  app.put("/user-crawl-url", async (req, res) => {
+  app.put("/user-crawl-url", verifyRequest(app), async (req, res) => {
     let body = req.body;
 
     const session = await Shopify.Utils.loadCurrentSession(req, res, true);
@@ -206,7 +206,7 @@ export async function createServer(
       .send(JSON.stringify({ data: "Url updated successfully" }));
   });
 
-  app.get("/user-mail", async (req, res) => {
+  app.get("/user-mail", verifyRequest(app), async (req, res) => {
     const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
     try {
@@ -218,7 +218,7 @@ export async function createServer(
     }
   });
 
-  app.delete("/user-crawl-url", async (req, res) => {
+  app.delete("/user-crawl-url", verifyRequest(app), async (req, res) => {
     let id = req.query.id.trim().replaceAll('"', "");
     try {
       let urlToScrapService = new UrlToScrapService();
@@ -252,7 +252,7 @@ export async function createServer(
       .send(JSON.stringify({ data: "Mail updated successfully" }));
   });
 
-  app.get("/user-crawl-url", async (req, res) => {
+  app.get("/user-crawl-url", verifyRequest(app), async (req, res) => {
     const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
     let urlToScrapService = new UrlToScrapService();
@@ -277,15 +277,15 @@ export async function createServer(
     }
   });
 
-  app.get("/customers-data_request", async (req, res) => {
+  app.get("/customers-data_request", verifyRequest(app), async (req, res) => {
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
-  app.get("/customers-redact", async (req, res) => {
+  app.get("/customers-redact", verifyRequest(app), async (req, res) => {
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
-  app.get("/shop-redact", async (req, res) => {
+  app.get("/shop-redact", verifyRequest(app), async (req, res) => {
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
   app.use(express.json());
