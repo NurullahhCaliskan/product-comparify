@@ -20,6 +20,7 @@ import { collections } from "./database.config.js";
 import UserService from "./service/userService.js";
 import ContactSupportService from "./service/contactSupportService.js";
 import MailHistoryService from "./service/mailHistoryService.js";
+import WebhookValidator from "./validate/webhookValidator.js";
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -278,14 +279,68 @@ export async function createServer(
   });
 
   app.get("/customers-data_request", verifyRequest(app), async (req, res) => {
+    const hmac = req.header("X-Shopify-Hmac-Sha256");
+    const topic = req.header("X-Shopify-Topic");
+    const shop = req.header("X-Shopify-Shop-Domain");
+
+    let webhookValidator = new WebhookValidator();
+    const verified = webhookValidator.verifyWebhook(req.body, hmac);
+
+    if (!verified) {
+      console.log("Failed to verify the incoming request.");
+      return res.status(401).send(JSON.stringify({ result: "fail" }));
+    }
+
+    const data = req.body.toString();
+    const payload = JSON.parse(data);
+    console.log(
+      `Verified webhook request. Shop: ${shop} Topic: ${topic} \n Payload: \n ${data}`
+    );
+
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
   app.get("/customers-redact", verifyRequest(app), async (req, res) => {
+    const hmac = req.header("X-Shopify-Hmac-Sha256");
+    const topic = req.header("X-Shopify-Topic");
+    const shop = req.header("X-Shopify-Shop-Domain");
+
+    let webhookValidator = new WebhookValidator();
+    const verified = webhookValidator.verifyWebhook(req.body, hmac);
+
+    if (!verified) {
+      console.log("Failed to verify the incoming request.");
+      return res.status(401).send(JSON.stringify({ result: "fail" }));
+    }
+
+    const data = req.body.toString();
+    const payload = JSON.parse(data);
+    console.log(
+      `Verified webhook request. Shop: ${shop} Topic: ${topic} \n Payload: \n ${data}`
+    );
+
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
 
   app.get("/shop-redact", verifyRequest(app), async (req, res) => {
+    const hmac = req.header("X-Shopify-Hmac-Sha256");
+    const topic = req.header("X-Shopify-Topic");
+    const shop = req.header("X-Shopify-Shop-Domain");
+
+    let webhookValidator = new WebhookValidator();
+    const verified = webhookValidator.verifyWebhook(req.body, hmac);
+
+    if (!verified) {
+      console.log("Failed to verify the incoming request.");
+      return res.status(401).send(JSON.stringify({ result: "fail" }));
+    }
+
+    const data = req.body.toString();
+    const payload = JSON.parse(data);
+    console.log(
+      `Verified webhook request. Shop: ${shop} Topic: ${topic} \n Payload: \n ${data}`
+    );
+
     return res.status(200).send(JSON.stringify({ result: "success" }));
   });
   app.use(express.json());
