@@ -46,7 +46,7 @@ async function loadDb() {
     collections.mailHistoryModel = db.collection("mail-history");
     collections.contactSupportModel = db.collection("contact-support");
 
-    console.log("success load db2");
+    console.log("success load db3");
   } catch (e) {
     console.log(e);
   }
