@@ -293,7 +293,7 @@ export async function createServer(
 
     req.body = body;
 
-    return next();
+    return res.status(422).send();
   });
 
   app.get("/customers-redact", verifyRequest(app), async (req, res) => {
@@ -310,7 +310,7 @@ export async function createServer(
 
     req.body = body;
 
-    return next();
+    return res.status(422).send();
   });
 
   app.get("/shop-redact", verifyRequest(app), async (req, res) => {
@@ -327,7 +327,7 @@ export async function createServer(
 
     req.body = body;
 
-    return next();
+    return res.status(422).send();
   });
   app.use(express.json());
 
