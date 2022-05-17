@@ -279,7 +279,7 @@ export async function createServer(
     }
   });
 
-  app.get("/customers-data_request", verifyRequest(app), async (req, res) => {
+  app.get("/customers-data_request", async (req, res) => {
     const shopifySecret = process.env.SHOPIFY_API_SECRET;
 
     const { verified, topic, domain, body } = await verifyWebhook(
@@ -288,15 +288,15 @@ export async function createServer(
     );
 
     if (!verified) {
-      return res.status(403).send();
+      return res.status(401).send();
     }
 
     req.body = body;
 
-    return res.status(422).send();
+    return res.status(401).send();
   });
 
-  app.get("/customers-redact", verifyRequest(app), async (req, res) => {
+  app.get("/customers-redact", async (req, res) => {
     const shopifySecret = process.env.SHOPIFY_API_SECRET;
 
     const { verified, topic, domain, body } = await verifyWebhook(
@@ -305,15 +305,15 @@ export async function createServer(
     );
 
     if (!verified) {
-      return res.status(403).send();
+      return res.status(401).send();
     }
 
     req.body = body;
 
-    return res.status(422).send();
+    return res.status(401).send();
   });
 
-  app.get("/shop-redact", verifyRequest(app), async (req, res) => {
+  app.get("/shop-redact", async (req, res) => {
     const shopifySecret = process.env.SHOPIFY_API_SECRET;
 
     const { verified, topic, domain, body } = await verifyWebhook(
@@ -322,13 +322,14 @@ export async function createServer(
     );
 
     if (!verified) {
-      return res.status(403).send();
+      return res.status(401).send();
     }
 
     req.body = body;
 
-    return res.status(422).send();
+    return res.status(401).send();
   });
+
   app.use(express.json());
 
   app.use((req, res, next) => {
