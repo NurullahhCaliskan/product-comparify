@@ -279,7 +279,7 @@ export async function createServer(
     }
   });
 
-  app.get("/customers-data_request", async (req, res) => {
+  app.post("/customers-data_request", async (req, res) => {
     const shopifySecret = process.env.SHOPIFY_API_SECRET;
 
     const { verified, topic, domain, body } = await verifyWebhook(
@@ -293,10 +293,10 @@ export async function createServer(
 
     req.body = body;
 
-    return res.status(401).send();
+    return res.status(200).send();
   });
 
-  app.get("/customers-redact", async (req, res) => {
+  app.post("/customers-redact", async (req, res) => {
     const shopifySecret = process.env.SHOPIFY_API_SECRET;
 
     const { verified, topic, domain, body } = await verifyWebhook(
@@ -310,10 +310,10 @@ export async function createServer(
 
     req.body = body;
 
-    return res.status(401).send();
+    return res.status(200).send();
   });
 
-  app.get("/shop-redact", async (req, res) => {
+  app.post("/shop-redact", async (req, res) => {
     const shopifySecret = process.env.SHOPIFY_API_SECRET;
 
     const { verified, topic, domain, body } = await verifyWebhook(
@@ -327,7 +327,7 @@ export async function createServer(
 
     req.body = body;
 
-    return res.status(401).send();
+    return res.status(200).send();
   });
 
   app.use(express.json());
