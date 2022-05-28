@@ -37,6 +37,7 @@ async function loadDb() {
     let client = new mongoDB.MongoClient(process.env.DBHOST);
 
     console.log(process.env.BACKENDURL);
+    console.log(process.env.SHOPIFY_API_KEY);
     console.log(process.env.NODE_ENV);
     await client.connect();
 
