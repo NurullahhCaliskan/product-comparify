@@ -39225,10 +39225,7 @@ For more information, please visit: https://go.apollo.dev/c/docs`)
           logo: {
             width: 224,
             topBarSource: V$,
-            contextualSaveBarSource:
-              "https://cdn.shopify.com/s/files/1/0446/6937/files/jaded-pixel-logo-gray.svg?6215648040070010999",
-            url: "http://jadedpixel.com",
-            accessibilityLabel: "Jaded Pixel",
+            accessibilityLabel: "Product Comparify",
           },
           offset: "60px",
           topBar: M,
@@ -40242,7 +40239,7 @@ For more information, please visit: https://go.apollo.dev/c/docs`)
       i18n: F$,
       children: _(Dr.Provider, {
         config: {
-          apiKey: "05ad0723db8739dcf4541842cf424e3e",
+          apiKey: "e7ff36fde2cac23c8cf5a8a81d0e1434",
           host: new URL(location).searchParams.get("host"),
           forceRedirect: !0,
         },

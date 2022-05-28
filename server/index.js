@@ -2,12 +2,11 @@ import { resolve } from "path";
 import express from "express";
 import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
-import "dotenv/config";
 import SessionService from "./service/sessionService.js";
 import ScrapValidator from "./validate/scrapValidator.js";
 import bp from "body-parser";
 import axios from "axios";
-
+import dotenv from "dotenv";
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
 import UrlToScrapService from "./service/urlToScrapService.js";
@@ -22,6 +21,10 @@ import ContactSupportService from "./service/contactSupportService.js";
 import MailHistoryService from "./service/mailHistoryService.js";
 import WebhookValidator from "./validate/webhookValidator.js";
 import verifyWebhook from "verify-shopify-webhook";
+import { Webhook } from "@shopify/shopify-api/dist/rest-resources/2022-04/index.js";
+import { Customer } from "@shopify/shopify-api/dist/rest-resources/2022-04/index.js";
+
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -33,6 +36,8 @@ async function loadDb() {
   try {
     let client = new mongoDB.MongoClient(process.env.DBHOST);
 
+    console.log(process.env.BACKENDURL);
+    console.log(process.env.NODE_ENV);
     await client.connect();
 
     let db = client.db(process.env.DBNAME);
@@ -47,6 +52,7 @@ async function loadDb() {
     collections.contactSupportModel = db.collection("contact-support");
 
     console.log("success load db4");
+    console.log(process.env.HOST.replace(/https:\/\//, ""));
   } catch (e) {
     console.log(e);
   }
@@ -87,15 +93,18 @@ export async function createServer(
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
 
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
-  app.use(bp.json());
 
   applyAuthMiddleware(app);
 
   app.post("/webhooks", async (req, res) => {
     try {
       await Shopify.Webhooks.Registry.process(req, res);
+      console.log(`Webhook processed, returned status code 200`);
     } catch (error) {
-      res.status(500).send(error.message);
+      console.log(`Failed to process webhook: ${error}`);
+      if (!res.headersSent) {
+        res.status(500).send(error.message);
+      }
     }
   });
 
@@ -263,9 +272,13 @@ export async function createServer(
   });
 
   app.get("/login", verifyRequest(app), async (req, res) => {
-    const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-    let sessionService = new SessionService();
-    sessionService.session(session);
+    try {
+      const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+      let sessionService = new SessionService();
+      sessionService.session(session);
+    } catch (e) {
+      console.log(e);
+    }
 
     res.status(200).send("countData");
   });
@@ -288,10 +301,13 @@ export async function createServer(
         shopifySecret
       );
 
+      console.log("/customers-data_request");
+      console.log({ verified, topic, domain, body });
       if (!verified) {
         return res.status(401).send();
       }
     } catch (e) {
+      console.log(e);
       return res.status(401).send();
     }
 
@@ -307,10 +323,13 @@ export async function createServer(
         shopifySecret
       );
 
+      console.log("/customers-redact");
+      console.log({ verified, topic, domain, body });
       if (!verified) {
         return res.status(401).send();
       }
     } catch (e) {
+      console.log(e);
       return res.status(401).send();
     }
 
@@ -326,10 +345,13 @@ export async function createServer(
         shopifySecret
       );
 
+      console.log("/shop-redact");
+      console.log({ verified, topic, domain, body });
       if (!verified) {
         return res.status(401).send();
       }
     } catch (e) {
+      console.log(e);
       return res.status(401).send();
     }
 
