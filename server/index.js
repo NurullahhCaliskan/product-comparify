@@ -92,7 +92,6 @@ export async function createServer(
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
 
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
-  app.use(express.json());
 
   applyAuthMiddleware(app);
 
@@ -119,6 +118,16 @@ export async function createServer(
     res.status(200).send(countData);
   });
 
+  app.post("/graphql", verifyRequest(app), async (req, res) => {
+    try {
+      const response = await Shopify.Utils.graphqlProxy(req, res);
+      res.status(200).send(response.body);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.use(express.json());
   app.get("/get-mail-history", verifyRequest(app), async (req, res) => {
     let response = [];
     try {
@@ -281,15 +290,6 @@ export async function createServer(
     }
 
     res.status(200).send("countData");
-  });
-
-  app.post("/graphql", verifyRequest(app), async (req, res) => {
-    try {
-      const response = await Shopify.Utils.graphqlProxy(req, res);
-      res.status(200).send(response.body);
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
   });
 
   app.post("/customers-data_request", async (req, res) => {
