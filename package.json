@@ -26,7 +26,6 @@
     "@shopify/shopify-api": "^3.0.0",
     "@vitejs/plugin-react": "1.2.0",
     "axios": "^0.26.1",
-    "body-parser": "^1.20.0",
     "cheerio": "^1.0.0-rc.10",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",

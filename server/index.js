@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
 import SessionService from "./service/sessionService.js";
 import ScrapValidator from "./validate/scrapValidator.js";
-import bp from "body-parser";
 import axios from "axios";
 import dotenv from "dotenv";
 import applyAuthMiddleware from "./middleware/auth.js";
@@ -19,7 +18,6 @@ import { collections } from "./database.config.js";
 import UserService from "./service/userService.js";
 import ContactSupportService from "./service/contactSupportService.js";
 import MailHistoryService from "./service/mailHistoryService.js";
-import WebhookValidator from "./validate/webhookValidator.js";
 import verifyWebhook from "verify-shopify-webhook";
 import { Webhook } from "@shopify/shopify-api/dist/rest-resources/2022-04/index.js";
 import { Customer } from "@shopify/shopify-api/dist/rest-resources/2022-04/index.js";
@@ -94,7 +92,7 @@ export async function createServer(
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
 
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
-  //app.use(bp.json());
+  app.use(express.json());
 
   applyAuthMiddleware(app);
 
@@ -359,8 +357,6 @@ export async function createServer(
 
     return res.status(200).send();
   });
-
-  app.use(express.json());
 
   app.use((req, res, next) => {
     const shop = req.query.shop;
