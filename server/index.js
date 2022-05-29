@@ -94,7 +94,7 @@ export async function createServer(
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
 
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
-  app.use(bp.json());
+  //app.use(bp.json());
 
   applyAuthMiddleware(app);
 
