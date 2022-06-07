@@ -1,145 +1,194 @@
 import { useCallback, useRef, useState } from "react";
 import {
-    ContextualSaveBar, Toast, TopBar, ActionList, Navigation, Page, Loading, Card, FormLayout, TextField, SkeletonPage, Layout,
-    AppProvider, Frame, TextContainer, SkeletonDisplayText, SkeletonBodyText, Modal, Button, ResourceList, TextStyle, Avatar, Icon
-} from "@shopify/polaris"
-import { ArrowLeftMinor, ConversationMinor, HomeMajor, OrdersMajor, DeleteMinor } from '@shopify/polaris-icons';
+  ContextualSaveBar,
+  Toast,
+  TopBar,
+  ActionList,
+  Navigation,
+  Page,
+  Loading,
+  Card,
+  FormLayout,
+  TextField,
+  SkeletonPage,
+  Layout,
+  AppProvider,
+  Frame,
+  TextContainer,
+  SkeletonDisplayText,
+  SkeletonBodyText,
+  Modal,
+  Button,
+  ResourceList,
+  TextStyle,
+  Avatar,
+  Icon,
+} from "@shopify/polaris";
+import {
+  ArrowLeftMinor,
+  ConversationMinor,
+  HomeMajor,
+  OrdersMajor,
+  DeleteMinor,
+} from "@shopify/polaris-icons";
 import { userLoggedInFetch } from "../App";
 import { useAppBridge } from "@shopify/app-bridge-react";
 
 export function Url() {
-    const app = useAppBridge();
-    const fetch = userLoggedInFetch(app);
-    const [activeToast, setActiveToast] = useState(false);
-    const [toastContent, setToastContent] = useState({data: "", error: false});
-    const toggleActive = useCallback(() => setActiveToast((activeToast) => !activeToast), []);
+  const app = useAppBridge();
+  const fetch = userLoggedInFetch(app);
+  const [activeToast, setActiveToast] = useState(false);
+  const [toastContent, setToastContent] = useState({ data: "", error: false });
+  const toggleActive = useCallback(
+    () => setActiveToast((activeToast) => !activeToast),
+    []
+  );
 
+  const toastMarkup = activeToast ? (
+    <Toast
+      content={toastContent.data}
+      error={toastContent.error}
+      onDismiss={toggleActive}
+    />
+  ) : null;
 
-    const toastMarkup = activeToast ? (
-        <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive}/>
-    ) : null;
+  const [loadingUrl, setLoadingUrl] = useState(false);
 
-    const [loadingUrl, setLoadingUrl] = useState(false);
+  const getUrlList = async () => {
+    const response = await fetch("/user-crawl-url").then((res) => res.json());
 
-    const getUrlList = async () => {
+    setUrlList(response);
 
-        const response = await fetch("/user-crawl-url").then((res) => res.json());
+    setLoadingUrl(false);
+  };
 
-        setUrlList(response);
+  const defaultState = useRef({
+    urlFieldValue: "www.shopify.com",
+  });
 
-        setLoadingUrl(false)
-    }
+  const [urlFieldValue, setUrlFieldValue] = useState(
+    defaultState.current.urlFieldValue
+  );
 
-    const defaultState = useRef({
-        urlFieldValue: 'www.shopify.com'
-    });
+  const [urlList, setUrlList] = useState(getUrlList);
 
-    const [urlFieldValue, setUrlFieldValue] = useState(defaultState.current.urlFieldValue);
+  const skipToContentRef = useRef(null);
+  const skipToContentTarget = (
+    <a id="SkipToContentTarget" ref={skipToContentRef} tabIndex={-1} />
+  );
 
-    const [urlList, setUrlList] = useState(getUrlList);
+  const handleUrlFieldChange = useCallback((value) => {
+    setUrlFieldValue(value);
+    value && setIsDirty(true);
+  }, []);
 
+  const [isDirty, setIsDirty] = useState(false);
 
-    const skipToContentRef = useRef(null);
-    const skipToContentTarget = (
-        <a id="SkipToContentTarget" ref={skipToContentRef} tabIndex={-1}/>
-    );
-
-    const handleUrlFieldChange = useCallback((value) => {
-        setUrlFieldValue(value);
-        value && setIsDirty(true);
-    }, []);
-
-    const [isDirty, setIsDirty] = useState(false);
-
-    const removeUrl = async (item) => {
-        setLoadingUrl(true);
-        try {
-            let response = await fetch("/user-crawl-url?id=" + JSON.stringify(item._id), {
-                method: 'DELETE', headers: {'Content-Type': 'application/json'},
-            })
-
-            const jsonValue = await response.json(); // Get JSON value from the
-
-            setToastContent({data: jsonValue.data, error: !response.ok})
-            setActiveToast(true)
-        } catch (error) {
-            setToastContent("error")
-            setActiveToast(true)
+  const removeUrl = async (item) => {
+    setLoadingUrl(true);
+    try {
+      let response = await fetch(
+        "/user-crawl-url?id=" + JSON.stringify(item._id),
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
         }
+      );
 
+      const jsonValue = await response.json(); // Get JSON value from the
 
-        await getUrlList();
+      setToastContent({ data: jsonValue.data, error: !response.ok });
+      setActiveToast(true);
+    } catch (error) {
+      setToastContent("error");
+      setActiveToast(true);
     }
 
-    const addNewUrl = async () => {
-        setLoadingUrl(true)
+    await getUrlList();
+  };
 
-        try {
-            let response = await fetch("/user-crawl-url", {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: urlFieldValue})
-            })
+  const addNewUrl = async () => {
+    setLoadingUrl(true);
 
-            const jsonValue = await response.json(); // Get JSON value from the
+    try {
+      let response = await fetch("/user-crawl-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: urlFieldValue }),
+      });
 
-            setToastContent({data: jsonValue.data, error: !response.ok})
-            setActiveToast(true)
+      const jsonValue = await response.json(); // Get JSON value from the
 
-        } catch (error) {
-            setToastContent("error")
-            setActiveToast(true)
-        }
-
-        await getUrlList();
+      setToastContent({ data: jsonValue.data, error: !response.ok });
+      setActiveToast(true);
+    } catch (error) {
+      setToastContent("error");
+      setActiveToast(true);
     }
 
+    await getUrlList();
+  };
 
-    return (<div>
+  return (
+    <div>
+      {toastMarkup}
 
-        {toastMarkup}
+      <Page title="Url">
+        <Layout>
+          {skipToContentTarget}
+          <Layout.AnnotatedSection
+            title="Url details"
+            description="Please add url which want to notify."
+          >
+            <Card>
+              <ResourceList
+                showHeader
+                items={urlList}
+                loading={loadingUrl}
+                renderItem={(item) => {
+                  const { id, url, website } = item;
+                  const media = (
+                    <Avatar
+                      customer
+                      size="medium"
+                      name={website}
+                      source={item.websites.faviconUrl}
+                    />
+                  );
+                  const shortcutActions = [
+                    { icon: DeleteMinor, onClick: () => removeUrl(item) },
+                  ];
+                  return (
+                    <ResourceList.Item
+                      id={id}
+                      url={url}
+                      media={media}
+                      shortcutActions={shortcutActions}
+                      persistActions
+                    >
+                      <h3>
+                        <TextStyle variation="strong">{website}</TextStyle>
+                      </h3>
+                    </ResourceList.Item>
+                  );
+                }}
+              />
+            </Card>
 
-        <Page title="Url">
-            <Layout>
-                {skipToContentTarget}
-                <Layout.AnnotatedSection
-                    title="Url details"
-                    description="Please add url which your want to notify."
-                >
-                    <Card>
-                        <ResourceList
-                            showHeader
-                            items={urlList}
-                            loading={loadingUrl}
-                            renderItem={(item) => {
-                                const {id, url, website} = item;
-                                const media = <Avatar customer size="medium" name={website} source={item.websites.faviconUrl}/>;
-                                const shortcutActions = [{icon: DeleteMinor, onClick: () => removeUrl(item)}]
-                                return (
-                                    <ResourceList.Item id={id} url={url} media={media} shortcutActions={shortcutActions} persistActions>
-                                        <h3>
-                                            <TextStyle variation="strong">{website}</TextStyle>
-                                        </h3>
-                                    </ResourceList.Item>
+            <Card sectioned>
+              <FormLayout>
+                <TextField
+                  label="Url"
+                  value={urlFieldValue}
+                  onChange={handleUrlFieldChange}
+                />
 
-                                );
-                            }}
-                        />
-                    </Card>
-
-
-                    <Card sectioned>
-                        <FormLayout>
-                            <TextField
-                                label="Url"
-                                value={urlFieldValue}
-                                onChange={handleUrlFieldChange}
-                            />
-
-                            <Button onClick={() => addNewUrl()}> Add</Button>
-                        </FormLayout>
-                    </Card>
-                </Layout.AnnotatedSection>
-            </Layout>
-        </Page>
-    </div>)
+                <Button onClick={() => addNewUrl()}> Add</Button>
+              </FormLayout>
+            </Card>
+          </Layout.AnnotatedSection>
+        </Layout>
+      </Page>
+    </div>
+  );
 }

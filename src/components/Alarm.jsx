@@ -222,7 +222,7 @@ export function Alarm() {
       {toastMarkup}
 
       <Banner
-        title="Alarm system working every 12:00AM GMT+1. Your mail will sending the next day."
+        title="Alarm system working every 12:00AM GMT+1. Mail will be sent the next day."
         status="warning"
       ></Banner>
 
