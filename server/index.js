@@ -149,11 +149,18 @@ export async function createServer(
 
       let url = process.env.BACKENDURL + "/mail/test?id=" + session.id;
       let response = await axios.get(url);
-    } catch (e) {
-      console.log(e);
-    }
 
-    res.status(200).send(JSON.stringify({ result: "success" }));
+      return res.status(response.status).send(response.data);
+    } catch (error) {
+      if (error.response) {
+        return res.status(error.response.status).send(error.response.data);
+      }
+      return res
+        .status(500)
+        .send(
+          JSON.stringify({ result: "Something went wrong. Please try again" })
+        );
+    }
   });
 
   app.post("/contact-support", async (req, res) => {
