@@ -1,38 +1,17 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ContextualSaveBar,
-  Toast,
-  TopBar,
-  ActionList,
-  Navigation,
   Page,
-  Loading,
   Card,
   FormLayout,
-  TextField,
-  SkeletonPage,
   Button,
   Layout,
-  AppProvider,
-  Frame,
-  TextContainer,
-  SkeletonDisplayText,
-  SkeletonBodyText,
   Modal,
   IndexTable,
-  Avatar,
   TextStyle,
-  RangeSlider,
+  Pagination,
   Icon,
 } from "@shopify/polaris";
-import {
-  ArrowLeftMinor,
-  CircleCancelMinor,
-  CircleTickMinor,
-  ConversationMinor,
-  HomeMajor,
-  OrdersMajor,
-} from "@shopify/polaris-icons";
+import { CircleCancelMinor, CircleTickMinor } from "@shopify/polaris-icons";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { userLoggedInFetch } from "../App.jsx";
 import mailSend from "../assets/mail-send.webp";
@@ -44,7 +23,12 @@ export function DashBoard() {
   const [mailStatusCode, setMailStatusCode] = useState(null);
   const [mailResponse, setMailResponse] = useState(null);
 
+  const [pageIndex, setPageIndex] = useState(0);
+  const [minPageIndex, setMinPageIndex] = useState(true);
+  const [maxPageIndex, setMaxPageIndex] = useState(true);
+
   const [modalActive, setModalActive] = useState(false);
+
   const getMailHistory = async () => {
     setLoadingUrl(true);
     const response = await fetch("/get-mail-history").then((res) => res.json());
@@ -53,6 +37,10 @@ export function DashBoard() {
   };
 
   const [mailList, setMailList] = useState(getMailHistory);
+
+  useEffect(() => {
+    setPage(0);
+  }, [mailList]);
 
   const skipToContentRef = useRef(null);
 
@@ -104,6 +92,32 @@ export function DashBoard() {
     </Modal>
   );
 
+  const setPage = (index) => {
+    let maxIndex = Math.ceil(mailList.length / 10) - 1;
+
+    if (index < 0) {
+      index = 0;
+    }
+
+    if (index > maxIndex) {
+      index = maxIndex;
+    }
+
+    if (index === 0) {
+      setMinPageIndex(true);
+    } else {
+      setMinPageIndex(false);
+    }
+
+    if (index === maxIndex) {
+      setMaxPageIndex(true);
+    } else {
+      setMaxPageIndex(false);
+    }
+
+    setPageIndex(index);
+  };
+
   const resourceName = {
     singular: "website",
     plural: "websites",
@@ -111,23 +125,25 @@ export function DashBoard() {
 
   const rowMarkup =
     mailList && mailList.length > 0
-      ? mailList.map(({ createDateTime, status, cachedAlarm, _id }, index) => (
-          <IndexTable.Row id={_id} key={_id} position={index}>
-            <IndexTable.Cell>
-              <TextStyle variation="strong">
-                {humanReadableTime(createDateTime)}
-              </TextStyle>
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              <TextStyle variation="strong">{cachedAlarm.length}</TextStyle>
-            </IndexTable.Cell>
-            <IndexTable.Cell>
-              <TextStyle variation="strong">
-                <Icon source={status ? CircleTickMinor : CircleCancelMinor} />
-              </TextStyle>
-            </IndexTable.Cell>
-          </IndexTable.Row>
-        ))
+      ? mailList
+          .slice(10 * pageIndex, 10 * pageIndex + 10)
+          .map(({ createDateTime, status, cachedAlarm, _id }, index) => (
+            <IndexTable.Row id={_id} key={_id} position={index}>
+              <IndexTable.Cell>
+                <TextStyle variation="strong">
+                  {humanReadableTime(createDateTime)}
+                </TextStyle>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <TextStyle variation="strong">{cachedAlarm.length}</TextStyle>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <TextStyle variation="strong">
+                  <Icon source={status ? CircleTickMinor : CircleCancelMinor} />
+                </TextStyle>
+              </IndexTable.Cell>
+            </IndexTable.Row>
+          ))
       : "";
 
   return (
@@ -135,6 +151,7 @@ export function DashBoard() {
       {testMailMarkup}
       <Layout>
         {skipToContentTarget}
+
         <Layout.AnnotatedSection
           title="Mail"
           description="Sending Mail Details"
@@ -143,7 +160,7 @@ export function DashBoard() {
             <IndexTable
               loading={loadingUrl}
               resourceName={resourceName}
-              itemCount={mailList?.length}
+              itemCount={2}
               selectable={false}
               headings={[
                 { title: "Sending Date" },
@@ -153,6 +170,17 @@ export function DashBoard() {
             >
               {rowMarkup}
             </IndexTable>
+
+            <div style={{ marginLeft: "40%" }}>
+              <Pagination
+                nextTooltip={"Next"}
+                previousTooltip={"Previous"}
+                onPrevious={() => setPage(pageIndex - 1)}
+                onNext={() => setPage(pageIndex + 1)}
+                hasPrevious={!minPageIndex}
+                hasNext={!maxPageIndex}
+              />
+            </div>
           </Card>
 
           <Button primary onClick={() => sendTestMail()}>

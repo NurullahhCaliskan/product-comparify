@@ -1,43 +1,17 @@
 import { useCallback, useRef, useState } from "react";
 import {
-  ContextualSaveBar,
   Toast,
-  TopBar,
-  ActionList,
-  Navigation,
   Page,
   Banner,
-  List,
-  Loading,
   Card,
-  FormLayout,
-  TextField,
-  SkeletonPage,
   Layout,
-  AppProvider,
-  Frame,
-  TextContainer,
-  SkeletonDisplayText,
-  SkeletonBodyText,
-  Modal,
-  Button,
-  ResourceList,
   TextStyle,
   Avatar,
   Icon,
-  Checkbox,
   IndexTable,
   RangeSlider,
 } from "@shopify/polaris";
-import {
-  ArrowLeftMinor,
-  ConversationMinor,
-  HomeMajor,
-  OrdersMajor,
-  DeleteMinor,
-  CircleCancelMinor,
-  CircleTickMinor,
-} from "@shopify/polaris-icons";
+import { CircleCancelMinor, CircleTickMinor } from "@shopify/polaris-icons";
 import { userLoggedInFetch } from "../App";
 import { useAppBridge } from "@shopify/app-bridge-react";
 
@@ -221,35 +195,32 @@ export function Alarm() {
     <div>
       {toastMarkup}
 
-      <Banner
-        title="Alarm system working every 12:00AM GMT+1. Mail will be sent the next day."
-        status="warning"
-      ></Banner>
-
-      <Page title="Alarm">
+      <div style={{ width: "90%" }}>
+        <Banner
+          title="Alarm system working every 12:00AM GMT+1. Mail will be sent the next day."
+          status="warning"
+        />
+      </div>
+      <Page title="Alarm" subtitle="Manage an alarm according to the website.">
         <Layout>
           {skipToContentTarget}
-          <Layout.AnnotatedSection
-            title="Alarm Configurations"
-            description="You can manage an alarm according to the website you want."
-          >
-            <Card>
-              <IndexTable
-                loading={loadingUrl}
-                resourceName={resourceName}
-                itemCount={urlList?.length}
-                selectable={false}
-                headings={[
-                  { title: "Icon" },
-                  { title: "Website" },
-                  { title: "Send Alarm When %x Price" },
-                  { title: "Alarm Status" },
-                ]}
-              >
-                {rowMarkup}
-              </IndexTable>
-            </Card>
-          </Layout.AnnotatedSection>
+
+          <Card>
+            <IndexTable
+              loading={loadingUrl}
+              resourceName={resourceName}
+              itemCount={urlList?.length}
+              selectable={false}
+              headings={[
+                { title: "Icon" },
+                { title: "Website" },
+                { title: "Send Alarm When %x Price" },
+                { title: "Alarm Status" },
+              ]}
+            >
+              {rowMarkup}
+            </IndexTable>
+          </Card>
         </Layout>
       </Page>
     </div>

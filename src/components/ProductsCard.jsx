@@ -29,6 +29,7 @@ export function ProductsCard() {
 
   const app = useAppBridge();
   const fetch = userLoggedInFetch(app);
+
   async function updateProductCount() {
     const { count } = await fetch("/products-count").then((res) => res.json());
     setProductCount(count);
@@ -39,9 +40,9 @@ export function ProductsCard() {
   }, []);
 
   const testet = async () => {
-      console.log('test')
-      await fetch("/login")
-  }
+    console.log("test");
+    await fetch("/login");
+  };
 
   const toastMarkup = hasResults && (
     <Toast
@@ -65,7 +66,7 @@ export function ProductsCard() {
               <TextStyle variation="strong">{productCount}</TextStyle>
             </DisplayText>
           </Heading>
-            <button onClick={() => testet()}> test </button>
+          <button onClick={() => testet()}> test</button>
           <Button
             primary
             loading={loading}

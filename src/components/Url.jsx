@@ -1,36 +1,18 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import {
-  ContextualSaveBar,
   Toast,
-  TopBar,
-  ActionList,
-  Navigation,
   Page,
-  Loading,
   Card,
   FormLayout,
   TextField,
-  SkeletonPage,
   Layout,
-  AppProvider,
-  Frame,
-  TextContainer,
-  SkeletonDisplayText,
-  SkeletonBodyText,
-  Modal,
   Button,
   ResourceList,
   TextStyle,
   Avatar,
-  Icon,
+  Pagination,
 } from "@shopify/polaris";
-import {
-  ArrowLeftMinor,
-  ConversationMinor,
-  HomeMajor,
-  OrdersMajor,
-  DeleteMinor,
-} from "@shopify/polaris-icons";
+import { DeleteMinor } from "@shopify/polaris-icons";
 import { userLoggedInFetch } from "../App";
 import { useAppBridge } from "@shopify/app-bridge-react";
 
@@ -39,6 +21,11 @@ export function Url() {
   const fetch = userLoggedInFetch(app);
   const [activeToast, setActiveToast] = useState(false);
   const [toastContent, setToastContent] = useState({ data: "", error: false });
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [minPageIndex, setMinPageIndex] = useState(true);
+  const [maxPageIndex, setMaxPageIndex] = useState(true);
+
   const toggleActive = useCallback(
     () => setActiveToast((activeToast) => !activeToast),
     []
@@ -58,8 +45,9 @@ export function Url() {
     const response = await fetch("/user-crawl-url").then((res) => res.json());
 
     setUrlList(response);
-
     setLoadingUrl(false);
+
+    //setPage(0)
   };
 
   const defaultState = useRef({
@@ -71,6 +59,10 @@ export function Url() {
   );
 
   const [urlList, setUrlList] = useState(getUrlList);
+
+  useEffect(() => {
+    setPage(0);
+  }, [urlList]);
 
   const skipToContentRef = useRef(null);
   const skipToContentTarget = (
@@ -129,6 +121,32 @@ export function Url() {
     await getUrlList();
   };
 
+  const setPage = (index) => {
+    let maxIndex = Math.ceil(urlList.length / 10) - 1;
+
+    if (index < 0) {
+      index = 0;
+    }
+
+    if (index > maxIndex) {
+      index = maxIndex;
+    }
+
+    if (index === 0) {
+      setMinPageIndex(true);
+    } else {
+      setMinPageIndex(false);
+    }
+
+    if (index === maxIndex) {
+      setMaxPageIndex(true);
+    } else {
+      setMaxPageIndex(false);
+    }
+
+    setPageIndex(index);
+  };
+
   return (
     <div>
       {toastMarkup}
@@ -143,7 +161,11 @@ export function Url() {
             <Card>
               <ResourceList
                 showHeader
-                items={urlList}
+                items={
+                  urlList && urlList.length > 0
+                    ? urlList.slice(10 * pageIndex, 10 * pageIndex + 10)
+                    : []
+                }
                 loading={loadingUrl}
                 renderItem={(item) => {
                   const { id, url, website } = item;
@@ -173,6 +195,17 @@ export function Url() {
                   );
                 }}
               />
+
+              <div style={{ marginLeft: "40%" }}>
+                <Pagination
+                  nextTooltip={"Next"}
+                  previousTooltip={"Previous"}
+                  onPrevious={() => setPage(pageIndex - 1)}
+                  onNext={() => setPage(pageIndex + 1)}
+                  hasPrevious={!minPageIndex}
+                  hasNext={!maxPageIndex}
+                />
+              </div>
             </Card>
 
             <Card sectioned>
