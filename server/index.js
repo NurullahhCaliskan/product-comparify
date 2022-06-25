@@ -41,8 +41,8 @@ async function loadDb() {
     await client.connect();
 
     let db = client.db(process.env.DBNAME);
-    collections.userWebsitesRelationModel = db.collection(
-      "user-websites-relation"
+    collections.storeWebsitesRelationModel = db.collection(
+      "store-websites-relation"
     );
     collections.websitesModel = db.collection("websites");
     collections.productHistoryModel = db.collection("product-history");
@@ -152,8 +152,14 @@ export async function createServer(
   app.get("/send-test-mail", verifyRequest(app), async (req, res) => {
     try {
       const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+      const client = await new Shopify.Clients.Rest(
+        session.shop,
+        session.accessToken
+      );
+      const clientResponse = await client.get({ path: "shop" });
 
-      let url = process.env.BACKENDURL + "/mail/test?id=" + session.id;
+      let url =
+        process.env.BACKENDURL + "/mail/test?id=" + clientResponse.body.shop.id;
       let response = await axios.get(url);
 
       return res.status(response.status).send(response.data);

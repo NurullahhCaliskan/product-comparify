@@ -1,7 +1,7 @@
 import * as mongoDB from "mongodb";
 
 export let collections = {
-  userWebsitesRelationModel: null,
+  storeWebsitesRelationModel: null,
   websitesModel: null,
   productHistoryModel: null,
   userSessionModel: null,

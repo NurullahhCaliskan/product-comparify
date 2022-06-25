@@ -12,7 +12,7 @@ export default class UrlToScrapRepository {
    * @return {Promise<void>}
    */
   async deleteUrlToScrapRepository(id) {
-    await collections.userWebsitesRelationModel
+    await collections.storeWebsitesRelationModel
       .findOneAndDelete({ _id: ObjectId(id) })
       .then((r) => r)
       .catch((e) => {
@@ -35,7 +35,7 @@ export default class UrlToScrapRepository {
       value: 10,
     };
 
-    await collections.userWebsitesRelationModel
+    await collections.storeWebsitesRelationModel
       .insertOne(insertingData)
       .then((res) => res)
       .catch((e) => e);
@@ -77,7 +77,7 @@ export default class UrlToScrapRepository {
       },
     };
 
-    await collections.userWebsitesRelationModel
+    await collections.storeWebsitesRelationModel
       .updateOne(query, newRecord, { upsert: true })
       .then((r) => r)
       .catch((e) => e);
@@ -93,7 +93,7 @@ export default class UrlToScrapRepository {
     let insertingData = { storeId: storeId, website: url };
 
     let response = [];
-    await collections.userWebsitesRelationModel
+    await collections.storeWebsitesRelationModel
       .find(insertingData)
       .toArray()
       .then((resp) => {
@@ -137,7 +137,7 @@ export default class UrlToScrapRepository {
       },
     ];
 
-    await collections.userWebsitesRelationModel
+    await collections.storeWebsitesRelationModel
       .aggregate(aggregateJson)
       .toArray()
       .then((resp) => {
