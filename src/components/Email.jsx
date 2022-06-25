@@ -25,8 +25,8 @@ export function Email() {
 
     console.log(response);
 
-    if (response?.mail) {
-      setEmailFieldValue(response.mail);
+    if (response?.selectedMail) {
+      setEmailFieldValue(response.selectedMail);
     }
 
     setLoadingUrl(false);

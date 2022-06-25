@@ -5,9 +5,6 @@ import SessionService from "../service/sessionService.js";
 
 export default function applyAuthMiddleware(app) {
   app.get("/auth", async (req, res) => {
-    console.log("auth");
-    console.log("geliyor");
-
     if (!req.signedCookies[app.get("top-level-oauth-cookie")]) {
       return res.redirect(
         `/auth/toplevel?${new URLSearchParams(req.query).toString()}`
@@ -22,13 +19,10 @@ export default function applyAuthMiddleware(app) {
       app.get("use-online-tokens")
     );
 
-    console.log("redirectUrl");
-    console.log(redirectUrl);
     res.redirect(redirectUrl);
   });
 
   app.get("/auth/toplevel", (req, res) => {
-    console.log("/auth/toplevel");
     res.cookie(app.get("top-level-oauth-cookie"), "1", {
       signed: true,
       httpOnly: true,
@@ -48,7 +42,6 @@ export default function applyAuthMiddleware(app) {
   });
 
   app.get("/auth/callback", async (req, res) => {
-    console.log("/auth/callback");
     try {
       const session = await Shopify.Auth.validateAuthCallback(
         req,
@@ -56,8 +49,15 @@ export default function applyAuthMiddleware(app) {
         req.query
       );
 
+      const client = await new Shopify.Clients.Rest(
+        session.shop,
+        session.accessToken
+      );
+
+      const clientResponse = await client.get({ path: "shop" });
+
       let sessionService = new SessionService();
-      sessionService.session(session);
+      await sessionService.saveSession(clientResponse.body.shop, session);
 
       const host = req.query.host;
       app.set(

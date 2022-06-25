@@ -25,11 +25,11 @@ export default class UrlToScrapRepository {
   /***
    * add new url
    * @param url url
-   * @param userid userid
+   * @param storeId storeId
    */
-  async addUrlToScrapRepository(url, userid) {
+  async addUrlToScrapRepository(url, storeId) {
     let insertingData = {
-      userId: userid,
+      storeId: storeId,
       website: url,
       alarm: true,
       value: 10,
@@ -62,15 +62,15 @@ export default class UrlToScrapRepository {
   /***
    * update or insert url
    * @param body request body
-   * @param userid userid
+   * @param storeId storeId
    */
-  async upsertUrlRepository(body, userid) {
+  async upsertUrlRepository(body, storeId) {
     body.url = urlFormatter(body.url);
 
-    let query = { userId: userid, website: body.url };
+    let query = { storeId: storeId, website: body.url };
     let newRecord = {
       $set: {
-        userId: userid,
+        storeId: storeId,
         website: body.url,
         alarm: body.alarm,
         value: body.value,
@@ -86,11 +86,11 @@ export default class UrlToScrapRepository {
   /***
    * user url relation exists check
    * @param url url
-   * @param userid userid
+   * @param storeId storeId
    * @return {Promise<void>}
    */
-  async isExistsUserToUrlRelation(url, userid) {
-    let insertingData = { userId: userid, website: url };
+  async isExistsUserToUrlRelation(url, storeId) {
+    let insertingData = { storeId: storeId, website: url };
 
     let response = [];
     await collections.userWebsitesRelationModel
@@ -114,10 +114,10 @@ export default class UrlToScrapRepository {
 
   /**
    * get user's url
-   * @param userid userid
+   * @param storeId storeId
    * @return {Promise<*[]|*>}
    */
-  async getUserToUrlRelation(userid) {
+  async getUserToUrlRelation(storeId) {
     let result = [];
     let aggregateJson = [
       {
@@ -132,7 +132,7 @@ export default class UrlToScrapRepository {
 
       {
         $match: {
-          $and: [{ userId: userid }],
+          $and: [{ storeId: storeId }],
         },
       },
     ];

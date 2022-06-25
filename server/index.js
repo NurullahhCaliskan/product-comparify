@@ -15,12 +15,13 @@ import IsNotValidUrlException from "./exception/isNotValidUrlException.js";
 import { urlFormatter } from "./utility/stringUtility.js";
 import * as mongoDB from "mongodb";
 import { collections } from "./database.config.js";
-import UserService from "./service/userService.js";
 import ContactSupportService from "./service/contactSupportService.js";
 import MailHistoryService from "./service/mailHistoryService.js";
 import verifyWebhook from "verify-shopify-webhook";
 import { Webhook } from "@shopify/shopify-api/dist/rest-resources/2022-04/index.js";
 import { Customer } from "@shopify/shopify-api/dist/rest-resources/2022-04/index.js";
+import ProductHistoryCrawlerQueueService from "./service/ProductHistoryCrawlerQueueService,.js";
+import { Product } from "@shopify/shopify-api/dist/rest-resources/2022-04/index.js";
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -45,10 +46,14 @@ async function loadDb() {
     );
     collections.websitesModel = db.collection("websites");
     collections.productHistoryModel = db.collection("product-history");
-    collections.userModel = db.collection("user");
     collections.userSessionModel = db.collection("user-session");
     collections.mailHistoryModel = db.collection("mail-history");
     collections.contactSupportModel = db.collection("contact-support");
+    collections.productHistoryCrawlerQueueModel = db.collection(
+      "product-history-crawler-queue"
+    );
+    collections.storeModel = db.collection("store");
+    collections.storeUserModel = db.collection("store-user");
 
     console.log("success load db4");
     console.log(process.env.HOST.replace(/https:\/\//, ""));
@@ -133,6 +138,7 @@ export async function createServer(
     try {
       const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
+      console.log(session);
       let mailHistoryService = new MailHistoryService();
 
       response = await mailHistoryService.getMailHistoryByUserid(session.id);
@@ -188,15 +194,31 @@ export async function createServer(
   app.post("/user-crawl-url", verifyRequest(app), async (req, res) => {
     let body = req.body;
     body.url = urlFormatter(body.url);
+    let scrapService = new ScrapValidator();
+    let urlToScrapService = new UrlToScrapService();
 
-    const session = await Shopify.Utils.loadCurrentSession(req, res, true);
     try {
-      let scrapService = new ScrapValidator();
+      const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+      const client = await new Shopify.Clients.Rest(
+        session.shop,
+        session.accessToken
+      );
+      const clientResponse = await client.get({ path: "shop" });
+
       await scrapService.checkValidShopifyUrl(body.url);
 
-      let urlToScrapService = new UrlToScrapService();
-      await urlToScrapService.isExistsUserToUrlRelation(body.url, session.id);
-      await urlToScrapService.addUrlToScrapService(body.url, session.id);
+      let productHistoryCrawlerQueueService =
+        new ProductHistoryCrawlerQueueService();
+      await urlToScrapService.isExistsUserToUrlRelation(
+        body.url,
+        clientResponse.body.shop.id
+      );
+      await urlToScrapService.addUrlToScrapService(
+        body.url,
+        clientResponse.body.shop.id
+      );
+
+      await productHistoryCrawlerQueueService.addToQueue(body.url);
     } catch (e) {
       if (e instanceof IsNotValidUrlException) {
         return res.status(422).send(e.message);
@@ -213,14 +235,19 @@ export async function createServer(
   app.put("/user-crawl-url", verifyRequest(app), async (req, res) => {
     let body = req.body;
 
-    const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-
     let urlToScrapService = new UrlToScrapService();
     try {
       let scrapService = new ScrapValidator();
       await scrapService.checkValidShopifyUrl(body.url);
 
-      await urlToScrapService.updateUrl(body, session.id);
+      const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+      const client = await new Shopify.Clients.Rest(
+        session.shop,
+        session.accessToken
+      );
+      const clientResponse = await client.get({ path: "shop" });
+
+      await urlToScrapService.updateUrl(body, clientResponse.body.shop.id);
     } catch (e) {
       if (e instanceof IsNotValidUrlException) {
         return res.status(422).send(e.message);
@@ -234,11 +261,16 @@ export async function createServer(
   });
 
   app.get("/user-mail", verifyRequest(app), async (req, res) => {
-    const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+    let mailService = new MailService();
 
     try {
-      let mailService = new MailService();
-      let result = await mailService.getUserMail(session.id);
+      const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+      const client = await new Shopify.Clients.Rest(
+        session.shop,
+        session.accessToken
+      );
+      const clientResponse = await client.get({ path: "shop" });
+      let result = await mailService.getUserMail(clientResponse.body.shop.id);
       return res.status(200).send(JSON.stringify(result));
     } catch (e) {
       return res.status(422).send(e.message);
@@ -260,16 +292,22 @@ export async function createServer(
   });
 
   app.post("/user-mail", verifyRequest(app), async (req, res) => {
+    let mailValidator = new MailValidator();
+    let mailService = new MailService();
     let body = req.body;
-    const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
     try {
-      let mailValidator = new MailValidator();
       mailValidator.checkValidShopifyUrl(body.email);
 
-      let mailService = new MailService();
+      const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
-      await mailService.upsertUserMail(body.email, session.id);
+      const client = await new Shopify.Clients.Rest(
+        session.shop,
+        session.accessToken
+      );
+
+      const clientResponse = await client.get({ path: "shop" });
+      await mailService.upsertUserMail(body.email, clientResponse.body.shop.id);
     } catch (e) {
       return res.status(422).send(e.message);
     }
@@ -281,24 +319,37 @@ export async function createServer(
 
   app.get("/user-crawl-url", verifyRequest(app), async (req, res) => {
     const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+    const client = await new Shopify.Clients.Rest(
+      session.shop,
+      session.accessToken
+    );
+    const clientResponse = await client.get({ path: "shop" });
 
     let urlToScrapService = new UrlToScrapService();
-    let data = await urlToScrapService.getUrlToScrapService(session.id);
+    let data = await urlToScrapService.getUrlToScrapService(
+      clientResponse.body.shop.id
+    );
     return res.status(200).send(JSON.stringify(data));
   });
 
-  app.get("/login", verifyRequest(app), async (req, res) => {
+  app.get("/get-user-products", verifyRequest(app), async (req, res) => {
     try {
-      const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-      let sessionService = new SessionService();
-      sessionService.session(session);
+      console.log("asdsa");
+      const test_session = await Shopify.Utils.loadCurrentSession(req, res);
+      let products = await Product.all({
+        session: test_session,
+      });
+
+      console.log(products);
     } catch (e) {
       console.log(e);
+      return res.status(401).send();
     }
 
-    res.status(200).send("countData");
+    return res.status(200).send();
   });
 
+  //webhooks
   app.post("/customers-data_request", async (req, res) => {
     try {
       const shopifySecret = process.env.SHOPIFY_API_SECRET;

@@ -3,40 +3,29 @@ import IsNotValidUrlException from "../exception/isNotValidUrlException.js";
 import { collections } from "../database.config.js";
 
 export default class MailRepository {
+  /***
+   * get store's mail
+   * @param storeId storeId
+   * @return {Promise<(Document & {_id: null})|{selectedMail: null}>} mail
+   */
+  async getUpsertMailByStoreId(storeId) {
+    let query = { id: storeId };
 
-    /***
-     * get user's mail
-     * @param userid userid
-     * @return {Promise<(Document & {_id: InferIdType<Document>})|{mail: null}>} mail
-     */
-    async getMailByUserid(userid) {
+    const options = { projection: { _id: 1, selectedMail: 1 } };
 
-        let insertingData = {userId: userid}
+    return await collections.storeModel.findOne(query, options);
+  }
 
-        const options = {projection: {_id: 1, mail: 1}};
-        let result = {}
+  /***
+   * update or insert user's mail
+   * @param mail mail
+   * @param storeId store id
+   * @return {Promise<void>} void
+   */
+  async upsertMailByStoreId(mail, storeId) {
+    let query = { id: storeId };
+    let newRecord = { $set: { userId: storeId, selectedMail: mail } };
 
-        await collections.userModel.findOne(insertingData, options).then(resp => {
-            result = resp;
-        }).catch(e => {
-            result = {mail: null}
-        })
-
-        return result;
-    }
-
-    /***
-     * update or insert user's mail
-     * @param mail mail
-     * @param userid userid
-     * @return {Promise<void>} void
-     */
-    async upsertMailByUserid(mail, userid) {
-
-        let query = {userId: userid};
-        let newRecord = {$set: {userId: userid, mail: mail}};
-
-        await collections.userModel.updateOne(query, newRecord);
-
-    }
+    await collections.storeModel.updateOne(query, newRecord);
+  }
 }

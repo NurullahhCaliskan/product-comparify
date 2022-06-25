@@ -72,6 +72,10 @@ export function DashBoard() {
     setLoadingUrl(false);
   };
 
+  const getProductList = async () => {
+    const response = await fetch("/get-user-products");
+  };
+
   const toggleModalActive = useCallback(
     () => setModalActive((modalActive) => !modalActive),
     []
@@ -157,6 +161,11 @@ export function DashBoard() {
           description="Sending Mail Details"
         >
           <Card>
+            <Button primary onClick={() => getProductList()}>
+              {" "}
+              Get Product List TEST
+            </Button>
+
             <IndexTable
               loading={loadingUrl}
               resourceName={resourceName}
