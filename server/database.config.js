@@ -11,4 +11,5 @@ export let collections = {
     productMailHistoryModel: null,
     storeModel: null,
     storeUserModel: null,
+    logHistoryModel: null,
 };

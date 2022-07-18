@@ -1,6 +1,12 @@
 import { collections } from '../database.config.js';
 
 export default class StoreRepository {
+    /***
+     * get user and store info
+     * @param userId
+     * @param storeId
+     * @return {Promise<{}>}
+     */
     async getUserInfo(userId, storeId) {
         let json = [
             {

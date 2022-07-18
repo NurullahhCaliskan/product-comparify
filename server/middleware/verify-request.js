@@ -1,4 +1,7 @@
 import { Shopify } from '@shopify/shopify-api';
+import { getBrowserName } from '../utility/helper.js';
+import logHistoryService from '../service/logHistoryService.js';
+import LogHistoryService from '../service/logHistoryService.js';
 
 const TEST_GRAPHQL_QUERY = `
 {
@@ -9,7 +12,29 @@ const TEST_GRAPHQL_QUERY = `
 
 export default function verifyRequest(app, { returnHeader = true } = {}) {
     return async (req, res, next) => {
+        let logHistoryService = new LogHistoryService();
         const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+        const requestStart = Date.now();
+
+        res.on('finish', () => {
+            const { rawHeaders, httpVersion, method, socket, url } = req;
+            const { remoteAddress, remoteFamily } = socket;
+
+            let logJson = {
+                storeId: session.onlineAccessInfo.associated_user.storeId,
+                userId: session.onlineAccessInfo.associated_user.id,
+                timestamp: Date.now(),
+                processingTime: Date.now() - requestStart,
+                browser: getBrowserName(req.headers['user-agent']),
+                method,
+                url,
+                httpVersion,
+                remoteAddress,
+                remoteFamily,
+            };
+
+            logHistoryService.saveLogHistory(logJson);
+        });
 
         let shop = req.query.shop;
 

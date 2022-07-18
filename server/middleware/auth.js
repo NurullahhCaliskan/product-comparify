@@ -42,7 +42,7 @@ export default function applyAuthMiddleware(app) {
             const clientResponse = await client.get({ path: 'shop' });
 
             let sessionService = new SessionService();
-            await sessionService.saveSession(clientResponse.body.shop, session);
+            //await sessionService.saveSession(clientResponse.body.shop, session);
 
             const host = req.query.host;
             app.set(

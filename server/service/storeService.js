@@ -1,6 +1,12 @@
 import StoreRepository from '../repository/storeRepository.js';
 
 export default class StoreService {
+    /***
+     * get user and store info
+     * @param userId
+     * @param storeId
+     * @return {Promise<{}>}
+     */
     async getUserAndStoreInfo(userId, storeId) {
         let storeService = new StoreRepository();
         let response = {};

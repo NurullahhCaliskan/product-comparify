@@ -1,8 +1,13 @@
-import MailHistoryRepository from '../repository/mailHistoryRepository.js';
 import DashboardRepository from '../repository/dashboardRepository.js';
 import { get7dayMidnight, getTodayMidnight, getYesterdayMidnight } from '../utility/dayUtility.js';
 
 export default class DashboardService {
+    /***
+     * get Dashboard Information such as price average
+     * @param storeId
+     * @param dateType
+     * @return {Promise<{}>}
+     */
     async getDashboardInformation(storeId, dateType) {
         let date = new Date();
         let dashboardRepository = new DashboardRepository();

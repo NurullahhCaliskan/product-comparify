@@ -22,7 +22,6 @@ import ProductHistoryCrawlerQueueService from './service/ProductHistoryCrawlerQu
 import SearchMapper from './mapper/searchMapper.js';
 import SearchService from './service/searchService.js';
 import DashboardService from './service/dashboardService.js';
-import { get7dayMidnight, getTodayMidnight, getYesterdayMidnight } from './utility/dayUtility.js';
 import ProductMailHistoryService from './service/productMailHistoryService.js';
 import StoreService from './service/storeService.js';
 
@@ -54,6 +53,7 @@ async function loadDb() {
         collections.storeModel = db.collection('store');
         collections.storeUserModel = db.collection('store-user');
         collections.productMailHistoryModel = db.collection('product-mail-history');
+        collections.logHistoryModel = db.collection('log-history');
 
         console.log('success load db4');
         console.log(process.env.HOST.replace(/https:\/\//, ''));
@@ -131,11 +131,11 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     app.get('/get-mail-history', verifyRequest(app), async (req, res) => {
         let response = [];
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
             let mailHistoryService = new MailHistoryService();
 
-            response = await mailHistoryService.getMailHistoryByUserid(session.id);
+            response = await mailHistoryService.getMailHistoryByUserid(session.onlineAccessInfo.associated_user.storeId);
         } catch (e) {
             console.log(e);
         }
@@ -145,11 +145,9 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
     app.get('/send-test-mail', verifyRequest(app), async (req, res) => {
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-            const clientResponse = await client.get({ path: 'shop' });
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
-            let url = process.env.BACKENDURL + '/mail/test?id=' + clientResponse.body.shop.id;
+            let url = process.env.BACKENDURL + '/mail/test?id=' + session.onlineAccessInfo.associated_user.storeId;
             let response = await axios.get(url);
 
             return res.status(response.status).send(response.data);
@@ -164,15 +162,13 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     app.post('/contact-support', verifyRequest(app), async (req, res) => {
         console.log('contact-support');
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-            const clientResponse = await client.get({ path: 'shop' });
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
             let body = req.body;
 
             let contactSupportService = new ContactSupportService();
 
-            await contactSupportService.saveContactSupportService(clientResponse.body.shop.id, body.subject, body.message, body.topic);
+            await contactSupportService.saveContactSupportService(session.onlineAccessInfo.associated_user.storeId, body.subject, body.message, body.topic);
         } catch (e) {
             console.log(e);
         }
@@ -183,11 +179,9 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         let searchMapper = new SearchMapper();
         console.log('search');
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-            const clientResponse = await client.get({ path: 'shop' });
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
-            let searchModel = searchMapper.setSearchMapper(clientResponse.body.shop.id, req);
+            let searchModel = searchMapper.setSearchMapper(session.onlineAccessInfo.associated_user.storeId, req);
 
             console.log(searchModel);
         } catch (e) {
@@ -218,15 +212,13 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     app.post('/dashboard-info', async (req, res) => {
         console.log('dashboard-info');
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-            const clientResponse = await client.get({ path: 'shop' });
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
             let body = req.body;
 
             let dashboardService = new DashboardService();
 
-            let result = await dashboardService.getDashboardInformation(clientResponse.body.shop.id, body.date_type);
+            let result = await dashboardService.getDashboardInformation(session.onlineAccessInfo.associated_user.storeId, body.date_type);
 
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
@@ -236,17 +228,14 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     });
 
     app.post('/product-mail-history-info', async (req, res) => {
-        console.log('dashboard-info');
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-            const clientResponse = await client.get({ path: 'shop' });
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
             let body = req.body;
 
             let productMailHistoryService = new ProductMailHistoryService();
 
-            let result = await productMailHistoryService.getProductMailHistory(clientResponse.body.shop.id, body.date_type);
+            let result = await productMailHistoryService.getProductMailHistory(session.onlineAccessInfo.associated_user.storeId, body.date_type);
 
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
@@ -292,15 +281,13 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         let urlToScrapService = new UrlToScrapService();
 
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-            const clientResponse = await client.get({ path: 'shop' });
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
             await scrapService.checkValidShopifyUrl(body.url);
 
             let productHistoryCrawlerQueueService = new ProductHistoryCrawlerQueueService();
-            await urlToScrapService.isExistsUserToUrlRelation(body.url, clientResponse.body.shop.id);
-            await urlToScrapService.addUrlToScrapService(body.url, clientResponse.body.shop.id);
+            await urlToScrapService.isExistsUserToUrlRelation(body.url, session.onlineAccessInfo.associated_user.storeId);
+            await urlToScrapService.addUrlToScrapService(body.url, session.onlineAccessInfo.associated_user.storeId);
 
             await productHistoryCrawlerQueueService.addToQueue(body.url);
         } catch (e) {
@@ -322,11 +309,9 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             let scrapService = new ScrapValidator();
             await scrapService.checkValidShopifyUrl(body.url);
 
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-            const clientResponse = await client.get({ path: 'shop' });
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
-            await urlToScrapService.updateUrl(body, clientResponse.body.shop.id);
+            await urlToScrapService.updateUrl(body, session.onlineAccessInfo.associated_user.storeId);
         } catch (e) {
             if (e instanceof IsNotValidUrlException) {
                 return res.status(422).send(e.message);
@@ -341,7 +326,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         let storeService = new StoreService();
 
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
             let result = await storeService.getUserAndStoreInfo(session.onlineAccessInfo.associated_user.id, session.onlineAccessInfo.associated_user.storeId);
             return res.status(200).send(JSON.stringify(result));
@@ -375,12 +360,9 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         try {
             mailValidator.checkValidShopifyUrl(body.email);
 
-            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-
-            const clientResponse = await client.get({ path: 'shop' });
-            await mailService.upsertUserMail(body.email, clientResponse.body.shop.id);
+            await mailService.upsertUserMail(body.email, session.onlineAccessInfo.associated_user.storeId);
         } catch (e) {
             return res.status(422).send(e.message);
         }
@@ -389,12 +371,10 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     });
 
     app.get('/user-crawl-url', verifyRequest(app), async (req, res) => {
-        const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-        const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-        const clientResponse = await client.get({ path: 'shop' });
+        const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
         let urlToScrapService = new UrlToScrapService();
-        let data = await urlToScrapService.getUrlToScrapService(clientResponse.body.shop.id);
+        let data = await urlToScrapService.getUrlToScrapService(session.onlineAccessInfo.associated_user.storeId);
         return res.status(200).send(JSON.stringify(data));
     });
 

@@ -1,5 +1,3 @@
-import MongoClient from 'mongodb';
-import IsNotValidUrlException from '../exception/isNotValidUrlException.js';
 import { collections } from '../database.config.js';
 
 export default class MailRepository {
