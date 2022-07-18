@@ -138,6 +138,10 @@ export default class SearchRepository {
             andArray.push({ 'variants.price': { $lte: searchModel.price_max } });
         }
 
+        if (searchModel.search) {
+            andArray.push({ search: { $regex: '.*a.*' } });
+        }
+
         andArray.push({ storeWebsiteRelation: { $not: { $size: 0 } } });
         andArray.push({ 'storeWebsiteRelation.storeId': searchModel.storeId });
 

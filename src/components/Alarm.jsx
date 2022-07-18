@@ -1,8 +1,9 @@
-import { useCallback, useRef, useState } from 'react';
-import { Toast, Page, Banner, Card, Layout, TextStyle, Avatar, Icon, IndexTable, RangeSlider } from '@shopify/polaris';
-import { CircleCancelMinor, CircleTickMinor } from '@shopify/polaris-icons';
+import { useCallback, useState } from 'react';
+import { Avatar, Banner, Button, Card, Icon, IndexTable, Page, RangeSlider, TextStyle, Toast } from '@shopify/polaris';
+import { CircleCancelMinor, CircleTickMinor, DomainsMajor } from '@shopify/polaris-icons';
 import { userLoggedInFetch } from '../App';
 import { useAppBridge } from '@shopify/app-bridge-react';
+import { Loading } from '../helper/Loading.jsx';
 
 export function Alarm() {
     const app = useAppBridge();
@@ -14,6 +15,7 @@ export function Alarm() {
     const toastMarkup = activeToast ? <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive} /> : null;
 
     const [loadingUrl, setLoadingUrl] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(true);
 
     const getUrlList = async () => {
         setLoadingUrl(true);
@@ -22,25 +24,10 @@ export function Alarm() {
         setUrlList(response);
 
         setLoadingUrl(false);
+        setLoadingPage(false);
     };
 
-    const defaultState = useRef({
-        urlFieldValue: 'www.shopify.com',
-    });
-
-    const [urlFieldValue, setUrlFieldValue] = useState(defaultState.current.urlFieldValue);
-
     const [urlList, setUrlList] = useState(getUrlList);
-
-    const skipToContentRef = useRef(null);
-    const skipToContentTarget = <a id="SkipToContentTarget" ref={skipToContentRef} tabIndex={-1} />;
-
-    const handleUrlFieldChange = useCallback((value) => {
-        setUrlFieldValue(value);
-        value && setIsDirty(true);
-    }, []);
-
-    const [isDirty, setIsDirty] = useState(false);
 
     const radioButtonKeyListener = async (item) => {
         console.log(item);
@@ -127,20 +114,20 @@ export function Alarm() {
             ? urlList.map(({ id, website, websites, location, alarm, amountSpent, value }, index) => (
                   <IndexTable.Row id={id} key={id} position={index}>
                       <IndexTable.Cell>
-                          <Avatar customer size="medium" name={website} source={websites?.faviconUrl} />
+                          <Avatar customer size="medium" name={website} source={websites && websites.faviconUrl ? websites.faviconUrl : 'https://polaris.shopify.com/icons/DomainsMajor.svg'} />
                       </IndexTable.Cell>
                       <IndexTable.Cell>
                           <TextStyle variation="strong">{website}</TextStyle>
                       </IndexTable.Cell>
                       <IndexTable.Cell>
                           <div onClickCapture={() => radioButtonKeyListener(urlList[index])}>
-                              <RangeSlider min={-50} max={100} value={value} onChange={(e) => setRangeValue(e, index)} suffix={<p style={suffixStyles}>{value}</p>} output disabled={!alarm} />
+                              <RangeSlider min={1} max={100} value={value} onChange={(e) => setRangeValue(e, index)} suffix={<p style={suffixStyles}>{value}</p>} output disabled={!alarm} />
                           </div>
                       </IndexTable.Cell>
                       <IndexTable.Cell>
-                          <div onClick={() => updateAlarm(urlList[index])}>
-                              <Icon source={alarm ? CircleTickMinor : CircleCancelMinor} />
-                          </div>
+                          <Button onClick={() => updateAlarm(urlList[index])} primary={!alarm} secondary={alarm}>
+                              {!alarm ? 'Activated' : 'Deactivated'}
+                          </Button>
                       </IndexTable.Cell>
                       <IndexTable.Cell>{amountSpent}</IndexTable.Cell>
                   </IndexTable.Row>
@@ -148,23 +135,21 @@ export function Alarm() {
             : '';
 
     return (
-        <div>
+        <Page title="Alarm" subtitle="Manage an alarm according to the website.">
             {toastMarkup}
-
-            <div style={{ width: '90%' }}>
-                <Banner title="Alarm system working every 12:00AM GMT+1. Mail will be sent the next day." status="warning" />
-            </div>
-            <Page title="Alarm" subtitle="Manage an alarm according to the website.">
-                <Layout>
-                    {skipToContentTarget}
-
+            {loadingPage ? (
+                <Loading />
+            ) : (
+                <div>
+                    <Banner title="Alarm system working every 12:00AM GMT+1. Mail will be sent the next day." status="warning" />
+                    <br />
                     <Card>
-                        <IndexTable loading={loadingUrl} resourceName={resourceName} itemCount={urlList?.length} selectable={false} headings={[{ title: 'Icon' }, { title: 'Website' }, { title: 'Send Alarm When %x Price' }, { title: 'Alarm Status' }]}>
+                        <IndexTable loading={loadingUrl} resourceName={resourceName} itemCount={urlList?.length} selectable={false} headings={[{ title: '' }, { title: 'Website' }, { title: 'Alert at Least%' }, { title: 'Alarm Status' }]}>
                             {rowMarkup}
                         </IndexTable>
                     </Card>
-                </Layout>
-            </Page>
-        </div>
+                </div>
+            )}
+        </Page>
     );
 }

@@ -1,12 +1,17 @@
-import { useCallback, useRef, useState, useEffect } from 'react';
-import { Toast, Page, Card, FormLayout, TextField, Layout, Button, ResourceList, TextStyle, Avatar, Pagination } from '@shopify/polaris';
+import { useCallback, useEffect, useState } from 'react';
+import { Avatar, Button, Card, EmptySearchResult, EmptyState, Page, Pagination, ResourceList, Stack, TextField, TextStyle, Toast } from '@shopify/polaris';
 import { DeleteMinor } from '@shopify/polaris-icons';
 import { userLoggedInFetch } from '../App';
 import { useAppBridge } from '@shopify/app-bridge-react';
+import { Loading } from '../helper/Loading.jsx';
+import addStore from '../assets/addstore.svg';
 
 export function Url() {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
+
+    const [showedAddStoreCoverCounter, setShowedAddStoreCoverCounter] = useState(0);
+
     const [activeToast, setActiveToast] = useState(false);
     const [toastContent, setToastContent] = useState({ data: '', error: false });
 
@@ -18,31 +23,44 @@ export function Url() {
 
     const toastMarkup = activeToast ? <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive} /> : null;
 
-    const [loadingUrl, setLoadingUrl] = useState(false);
-
+    const [loadingUrl, setLoadingUrl] = useState(true);
+    const [showUrls, setShowUrls] = useState(true);
+    const [selectedItems, setSelectedItems] = useState([]);
     const getUrlList = async () => {
         const response = await fetch('/user-crawl-url').then((res) => res.json());
 
         setUrlList(response);
+
+        console.log(showedAddStoreCoverCounter);
+
+        if (response.length === 0) {
+            if (showedAddStoreCoverCounter === 0) {
+                setShowedAddStoreCoverCounter(showedAddStoreCoverCounter + 1);
+                setShowUrls(false);
+            }
+        }
         setLoadingUrl(false);
 
-        //setPage(0)
+        setSelectedItems([]);
+        setUrlFieldValue('www.shopify.com');
     };
 
-    const defaultState = useRef({
-        urlFieldValue: 'www.shopify.com',
-    });
-
-    const [urlFieldValue, setUrlFieldValue] = useState(defaultState.current.urlFieldValue);
+    const [urlFieldValue, setUrlFieldValue] = useState('www.shopify.com');
 
     const [urlList, setUrlList] = useState(getUrlList);
+
+    const resourceName = {
+        singular: 'url',
+        plural: 'urls',
+    };
+
+    const changeShowList = () => {
+        setShowUrls(true);
+    };
 
     useEffect(() => {
         setPage(0);
     }, [urlList]);
-
-    const skipToContentRef = useRef(null);
-    const skipToContentTarget = <a id="SkipToContentTarget" ref={skipToContentRef} tabIndex={-1} />;
 
     const handleUrlFieldChange = useCallback((value) => {
         setUrlFieldValue(value);
@@ -51,12 +69,21 @@ export function Url() {
 
     const [isDirty, setIsDirty] = useState(false);
 
-    const removeUrl = async (item) => {
+    useEffect(() => {
+        setShowedAddStoreCoverCounter(showedAddStoreCoverCounter);
+    }, [showedAddStoreCoverCounter]);
+
+    useEffect(() => {
+        setUrlList(urlList);
+    }, [urlList]);
+
+    const removeUrl = async () => {
         setLoadingUrl(true);
         try {
-            let response = await fetch('/user-crawl-url?id=' + JSON.stringify(item._id), {
-                method: 'DELETE',
+            let response = await fetch('/user-crawl-url-delete', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ urls: selectedItems }),
             });
 
             const jsonValue = await response.json(); // Get JSON value from the
@@ -72,7 +99,7 @@ export function Url() {
     };
 
     const addNewUrl = async () => {
-        setLoadingUrl(true);
+        //setLoadingUrl(true);
 
         try {
             let response = await fetch('/user-crawl-url', {
@@ -119,48 +146,77 @@ export function Url() {
         setPageIndex(index);
     };
 
+    //MARKUPS
+
+    const emptyStateMarkup = <EmptySearchResult title={'No Store Found'} withIllustration />;
+
+    const promotedBulkActions = [
+        {
+            content: 'Remove Stores',
+            onAction: () => removeUrl(),
+        },
+    ];
+
+    function resolveItemIds({ id }) {
+        return id;
+    }
+
     return (
         <div>
             {toastMarkup}
 
-            <Page title="Url">
-                <Layout>
-                    {skipToContentTarget}
-                    <Layout.AnnotatedSection title="Url details" description="Please add url which want to notify.">
-                        <Card>
-                            <ResourceList
-                                showHeader
-                                items={urlList && urlList.length > 0 ? urlList.slice(10 * pageIndex, 10 * pageIndex + 10) : []}
-                                loading={loadingUrl}
-                                renderItem={(item) => {
-                                    const { id, url, website } = item;
-                                    const media = <Avatar customer size="medium" name={website} source={item.websites.faviconUrl} />;
-                                    const shortcutActions = [{ icon: DeleteMinor, onClick: () => removeUrl(item) }];
-                                    return (
-                                        <ResourceList.Item id={id} url={url} media={media} shortcutActions={shortcutActions} persistActions>
-                                            <h3>
-                                                <TextStyle variation="strong">{website}</TextStyle>
-                                            </h3>
-                                        </ResourceList.Item>
-                                    );
-                                }}
-                            />
-
-                            <div style={{ marginLeft: '40%' }}>
-                                <Pagination nextTooltip={'Next'} previousTooltip={'Previous'} onPrevious={() => setPage(pageIndex - 1)} onNext={() => setPage(pageIndex + 1)} hasPrevious={!minPageIndex} hasNext={!maxPageIndex} />
-                            </div>
-                        </Card>
-
+            {loadingUrl ? (
+                <Loading />
+            ) : (
+                <Page title="Add Store" subtitle="Enter the link of the stores you want to follow below. Add to your list by clicking the button." fullWidth>
+                    {showUrls === false ? (
                         <Card sectioned>
-                            <FormLayout>
-                                <TextField label="Url" value={urlFieldValue} onChange={handleUrlFieldChange} />
-
-                                <Button onClick={() => addNewUrl()}> Add</Button>
-                            </FormLayout>
+                            <EmptyState heading="Add a url to get started" action={{ content: 'Add Store', onAction: () => changeShowList() }} image={addStore} fullWidth>
+                                <p>Don't have a store which you follow yet. Click to add a store to your watch list</p>
+                            </EmptyState>
                         </Card>
-                    </Layout.AnnotatedSection>
-                </Layout>
-            </Page>
+                    ) : (
+                        <div>
+                            <Card sectioned title="Store Url">
+                                <Stack>
+                                    <TextField value={urlFieldValue} onChange={handleUrlFieldChange} />
+
+                                    <Button onClick={() => addNewUrl()}> Add</Button>
+                                </Stack>
+                            </Card>
+
+                            <Card sectioned>
+                                <ResourceList
+                                    resourceName={resourceName}
+                                    selectedItems={selectedItems}
+                                    promotedBulkActions={promotedBulkActions}
+                                    onSelectionChange={setSelectedItems}
+                                    resolveItemId={resolveItemIds}
+                                    emptyState={emptyStateMarkup}
+                                    showHeader
+                                    items={urlList && urlList.length > 0 ? urlList.slice(10 * pageIndex, 10 * pageIndex + 10) : []}
+                                    loading={loadingUrl}
+                                    renderItem={(item) => {
+                                        const { id, url, website } = item;
+                                        const media = <Avatar customer size="medium" name={website} source={item.websites.faviconUrl ? item.websites.faviconUrl : 'https://polaris.shopify.com/icons/DomainsMajor.svg'} />;
+                                        return (
+                                            <ResourceList.Item id={id} url={url} media={media} persistActions>
+                                                <h3>
+                                                    <TextStyle variation="strong">{website}</TextStyle>
+                                                </h3>
+                                            </ResourceList.Item>
+                                        );
+                                    }}
+                                />
+
+                                <div style={{ marginLeft: '45%' }}>
+                                    <Pagination nextTooltip={'Next'} previousTooltip={'Previous'} onPrevious={() => setPage(pageIndex - 1)} onNext={() => setPage(pageIndex + 1)} hasPrevious={!minPageIndex} hasNext={!maxPageIndex} />
+                                </div>
+                            </Card>
+                        </div>
+                    )}
+                </Page>
+            )}
         </div>
     );
 }

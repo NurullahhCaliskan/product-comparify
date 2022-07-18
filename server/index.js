@@ -1,8 +1,7 @@
 import { resolve } from 'path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { Shopify, ApiVersion } from '@shopify/shopify-api';
-import SessionService from './service/sessionService.js';
+import { ApiVersion, Shopify } from '@shopify/shopify-api';
 import ScrapValidator from './validate/scrapValidator.js';
 import axios from 'axios';
 import dotenv from 'dotenv';
@@ -18,12 +17,14 @@ import { collections } from './database.config.js';
 import ContactSupportService from './service/contactSupportService.js';
 import MailHistoryService from './service/mailHistoryService.js';
 import verifyWebhook from 'verify-shopify-webhook';
-import { Webhook } from '@shopify/shopify-api/dist/rest-resources/2022-04/index.js';
-import { Customer } from '@shopify/shopify-api/dist/rest-resources/2022-04/index.js';
-import ProductHistoryCrawlerQueueService from './service/ProductHistoryCrawlerQueueService,.js';
 import { Product } from '@shopify/shopify-api/dist/rest-resources/2022-04/index.js';
+import ProductHistoryCrawlerQueueService from './service/ProductHistoryCrawlerQueueService,.js';
 import SearchMapper from './mapper/searchMapper.js';
 import SearchService from './service/searchService.js';
+import DashboardService from './service/dashboardService.js';
+import { get7dayMidnight, getTodayMidnight, getYesterdayMidnight } from './utility/dayUtility.js';
+import ProductMailHistoryService from './service/productMailHistoryService.js';
+import StoreService from './service/storeService.js';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -52,6 +53,7 @@ async function loadDb() {
         collections.productHistoryCrawlerQueueModel = db.collection('product-history-crawler-queue');
         collections.storeModel = db.collection('store');
         collections.storeUserModel = db.collection('store-user');
+        collections.productMailHistoryModel = db.collection('product-mail-history');
 
         console.log('success load db4');
         console.log(process.env.HOST.replace(/https:\/\//, ''));
@@ -131,7 +133,6 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, true);
 
-            console.log(session);
             let mailHistoryService = new MailHistoryService();
 
             response = await mailHistoryService.getMailHistoryByUserid(session.id);
@@ -160,16 +161,18 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         }
     });
 
-    app.post('/contact-support', async (req, res) => {
+    app.post('/contact-support', verifyRequest(app), async (req, res) => {
         console.log('contact-support');
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
+            const clientResponse = await client.get({ path: 'shop' });
 
             let body = req.body;
 
             let contactSupportService = new ContactSupportService();
 
-            await contactSupportService.saveContactSupportService(session.id, body.subject, body.message);
+            await contactSupportService.saveContactSupportService(clientResponse.body.shop.id, body.subject, body.message, body.topic);
         } catch (e) {
             console.log(e);
         }
@@ -210,6 +213,76 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         }
 
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
+    });
+
+    app.post('/dashboard-info', async (req, res) => {
+        console.log('dashboard-info');
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
+            const clientResponse = await client.get({ path: 'shop' });
+
+            let body = req.body;
+
+            let dashboardService = new DashboardService();
+
+            let result = await dashboardService.getDashboardInformation(clientResponse.body.shop.id, body.date_type);
+
+            return res.status(200).send(JSON.stringify(result));
+        } catch (e) {
+            console.log(e);
+        }
+        return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
+    });
+
+    app.post('/product-mail-history-info', async (req, res) => {
+        console.log('dashboard-info');
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
+            const clientResponse = await client.get({ path: 'shop' });
+
+            let body = req.body;
+
+            let productMailHistoryService = new ProductMailHistoryService();
+
+            let result = await productMailHistoryService.getProductMailHistory(clientResponse.body.shop.id, body.date_type);
+
+            return res.status(200).send(JSON.stringify(result));
+        } catch (e) {
+            console.log(e);
+        }
+        return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
+    });
+
+    app.post('/query/test', async (req, res) => {
+        console.log('query/test');
+        let date = new Date();
+
+        let body = req.body;
+
+        let dateType = body.date_type;
+
+        let json = [
+            {
+                $match: { $and: [{ storeId: 64695009492 }, { id: 84057161940 }] },
+            },
+
+            {
+                $lookup: {
+                    from: 'store',
+                    localField: 'storeId',
+                    foreignField: 'id',
+                    as: 'storeInfo',
+                },
+            },
+
+            { $project: { storeId: 1, first_name: 1, last_name: 1, 'storeInfo.address1': 1, 'storeInfo.country_name': 1, 'storeInfo.selectedMail': 1 } },
+        ];
+
+        let response = await collections.storeUserModel?.aggregate(json).toArray();
+
+        return res.send(JSON.stringify(response));
     });
 
     app.post('/user-crawl-url', verifyRequest(app), async (req, res) => {
@@ -264,25 +337,29 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         return res.status(200).send(JSON.stringify({ data: 'Url updated successfully' }));
     });
 
-    app.get('/user-mail', verifyRequest(app), async (req, res) => {
-        let mailService = new MailService();
+    app.get('/profile-info', verifyRequest(app), async (req, res) => {
+        let storeService = new StoreService();
 
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, true);
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-            const clientResponse = await client.get({ path: 'shop' });
-            let result = await mailService.getUserMail(clientResponse.body.shop.id);
+
+            let result = await storeService.getUserAndStoreInfo(session.onlineAccessInfo.associated_user.id, session.onlineAccessInfo.associated_user.storeId);
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
             return res.status(422).send(e.message);
         }
     });
 
-    app.delete('/user-crawl-url', verifyRequest(app), async (req, res) => {
-        let id = req.query.id.trim().replaceAll('"', '');
+    app.post('/user-crawl-url-delete', verifyRequest(app), async (req, res) => {
+        let body = req.body;
         try {
             let urlToScrapService = new UrlToScrapService();
-            await urlToScrapService.deleteUrlToScrapService(id);
+
+            let deletedArray = body.urls;
+            console.log(deletedArray);
+            for (const item of deletedArray) {
+                await urlToScrapService.deleteUrlToScrapService(item);
+            }
         } catch (e) {
             return res.status(422).send(e.message);
         }

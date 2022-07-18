@@ -1,13 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
-import { Toast, TopBar, Navigation, Loading, Card, FormLayout, TextField, SkeletonPage, Layout, AppProvider, Frame, TextContainer, SkeletonDisplayText, SkeletonBodyText, Modal } from '@shopify/polaris';
-import { ConversationMinor, HomeMajor, OrdersMajor, EmailMajor, ClockMinor } from '@shopify/polaris-icons';
-import { DashBoard } from './DashBoard.jsx';
+import { Card, Frame, Layout, Loading, Navigation, SkeletonBodyText, SkeletonDisplayText, SkeletonPage, TextContainer, Toast, TopBar } from '@shopify/polaris';
+import { AddProductMajor, ConversationMinor, ExchangeMajor, NotificationMajor, ProfileMinor, ReportMinor, SearchMinor } from '@shopify/polaris-icons';
 import { Url } from './Url.jsx';
 import { Email } from './Email.jsx';
 import { Alarm } from './Alarm.jsx';
-import favicon from '../assets/favicon.png';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { userLoggedInFetch } from '../App.jsx';
+import { ContactUs } from './ContactUs.jsx';
+import { Profile } from './Profile';
+import { Dashboard } from './dashboard/Dashboard.jsx';
 
 export function HomePage() {
     const app = useAppBridge();
@@ -33,17 +34,13 @@ export function HomePage() {
     const toggleMobileNavigationActive = useCallback(() => setMobileNavigationActive((mobileNavigationActive) => !mobileNavigationActive), []);
     const toggleIsLoading = useCallback(() => setIsLoading((isLoading) => !isLoading), []);
 
-    const handleFrameIndex = (value) => setFrameIndex(value);
+    const handleFrameIndex = (value) => {
+        setFrameIndex(value);
+    };
 
     const toggleModalActive = useCallback(() => setModalActive((modalActive) => !modalActive), []);
 
     const toastMarkup = toastActive ? <Toast onDismiss={toggleToastActive} content="Changes saved" /> : null;
-
-    const userMenuActions = [
-        {
-            items: [{ content: 'Community forums' }],
-        },
-    ];
 
     const saveContactSupport = async () => {
         if (supportSubject && supportMessage) {
@@ -67,42 +64,82 @@ export function HomePage() {
     const navigationMarkup = (
         <Navigation location="/">
             <Navigation.Section
-                separator
                 title="Product Comparify"
                 items={[
                     {
-                        label: 'Dashboard',
-                        icon: HomeMajor,
                         onClick: () => handleFrameIndex(0),
+                        label: 'Profile',
+                        icon: ProfileMinor,
                     },
                     {
-                        label: 'Url',
-                        icon: OrdersMajor,
                         onClick: () => handleFrameIndex(1),
+                        label: 'Contact Us',
+                        icon: ConversationMinor,
                     },
                     {
-                        label: 'Email',
-                        icon: EmailMajor,
                         onClick: () => handleFrameIndex(2),
-                    },
-                    {
-                        label: 'Alarm',
-                        icon: ClockMinor,
-                        onClick: () => handleFrameIndex(3),
+                        label: 'Add Store',
+                        icon: AddProductMajor,
                     },
                 ]}
-                action={{
-                    icon: ConversationMinor,
-                    accessibilityLabel: 'Contact support',
-                    onClick: toggleModalActive,
-                }}
+            />
+            <Navigation.Section
+                title="Product Alert"
+                items={[
+                    {
+                        onClick: () => handleFrameIndex(5),
+                        label: 'Dashboard',
+                        icon: ReportMinor,
+                    },
+                    {
+                        onClick: () => handleFrameIndex(4),
+                        label: 'Set Alarm',
+                        icon: NotificationMajor,
+                    },
+                ]}
+                separator
+            />
+            <Navigation.Section
+                title="Product Compare"
+                items={[
+                    {
+                        onClick: () => handleFrameIndex(0),
+                        label: 'Compare',
+                        icon: ExchangeMajor,
+                    },
+                ]}
+                separator
+            />
+            <Navigation.Section
+                title="General Search"
+                items={[
+                    {
+                        onClick: () => handleFrameIndex(0),
+                        label: 'General Keyword',
+                        icon: SearchMinor,
+                    },
+                ]}
+                separator
             />
         </Navigation>
     );
 
     const loadingMarkup = isLoading ? <Loading /> : null;
 
-    const actualPageMarkup = frameIndex === 0 ? <DashBoard /> : frameIndex === 1 ? <Url /> : frameIndex === 2 ? <Email /> : <Alarm />;
+    const getPageList = (index) => {
+        let pageList = [];
+
+        pageList.push(<Profile />);
+        pageList.push(<ContactUs />);
+        pageList.push(<Url />);
+        pageList.push(<Email />);
+        pageList.push(<Alarm />);
+        pageList.push(<Dashboard />);
+
+        return pageList[index];
+    };
+
+    const actualPageMarkup = getPageList(frameIndex);
 
     const loadingPageMarkup = (
         <SkeletonPage>
@@ -121,70 +158,11 @@ export function HomePage() {
 
     const pageMarkup = isLoading ? loadingPageMarkup : actualPageMarkup;
 
-    const modalMarkup = (
-        <Modal
-            open={modalActive}
-            onClose={toggleModalActive}
-            title="Contact support"
-            primaryAction={{
-                content: 'Send',
-                onAction: () => saveContactSupport(),
-            }}
-        >
-            <Modal.Section>
-                <FormLayout>
-                    <TextField label="Subject" value={supportSubject} onChange={handleSubjectChange} autoComplete="off" />
-                    <TextField label="Message" value={supportMessage} onChange={handleMessageChange} autoComplete="off" multiline />
-                </FormLayout>
-            </Modal.Section>
-        </Modal>
-    );
-
-    const logo = {
-        width: 224,
-        topBarSource: favicon,
-        accessibilityLabel: 'Product Comparify',
-    };
-
     return (
-        <div>
-            <AppProvider
-                i18n={{
-                    Polaris: {
-                        Avatar: {
-                            label: 'Avatar',
-                            labelWithInitials: 'Avatar with initials {initials}',
-                        },
-                        ContextualSaveBar: {
-                            save: 'Save',
-                            discard: 'Discard',
-                        },
-                        TextField: {
-                            characterCount: '{count} characters',
-                        },
-                        TopBar: {
-                            toggleMenuLabel: 'Toggle menu',
-                        },
-                        Modal: {
-                            iFrameTitle: 'body markup',
-                        },
-                        Frame: {
-                            skipToContent: 'Skip to content',
-                            navigationLabel: 'Navigation',
-                            Navigation: {
-                                closeMobileNavigationLabel: 'Close navigation',
-                            },
-                        },
-                    },
-                }}
-            >
-                <Frame logo={logo} offset="60px" topBar={topBarMarkup} navigation={navigationMarkup} showMobileNavigation={mobileNavigationActive} onNavigationDismiss={toggleMobileNavigationActive} skipToContentTarget={skipToContentRef.current}>
-                    {loadingMarkup}
-                    {pageMarkup}
-                    {toastMarkup}
-                    {modalMarkup}
-                </Frame>
-            </AppProvider>
-        </div>
+        <Frame navigation={navigationMarkup} showMobileNavigation={mobileNavigationActive} onNavigationDismiss={toggleMobileNavigationActive} skipToContentTarget={skipToContentRef.current}>
+            {loadingMarkup}
+
+            {pageMarkup}
+        </Frame>
     );
 }

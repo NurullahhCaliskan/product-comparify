@@ -1,8 +1,8 @@
 import { collections } from '../database.config.js';
 
 export default class ContactSupportRepository {
-    async saveContactRepository(userId, subject, message) {
-        let resultJson = { userId: userId, subject: subject, message: message };
+    async saveContactRepository(userId, subject, message, topic) {
+        let resultJson = { userId: userId, subject: subject, message: message, topic: topic };
 
         await collections.contactSupportModel
             .insertOne(resultJson)

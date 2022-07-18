@@ -36,7 +36,8 @@ export default class SearchMapper {
             body.updated_at_start,
             body.updated_at_end,
             body.price_min,
-            body.price_max
+            body.price_max,
+            body.search
         );
     }
 }

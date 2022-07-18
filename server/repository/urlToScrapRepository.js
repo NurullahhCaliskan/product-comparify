@@ -1,4 +1,4 @@
-import MongoClient, { ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import IsNotValidUrlException from '../exception/isNotValidUrlException.js';
 import OccurredUnknownErrorException from '../exception/occurredUnknownErrorException.js';
 import { urlFormatter } from '../utility/stringUtility.js';
@@ -136,6 +136,11 @@ export default class UrlToScrapRepository {
                 result = [];
             });
 
-        return result;
+        const newArrayOfObj = result.map(({ _id: id, ...rest }) => ({
+            id,
+            ...rest,
+        }));
+
+        return newArrayOfObj;
     }
 }

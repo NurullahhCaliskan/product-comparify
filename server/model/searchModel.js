@@ -25,7 +25,8 @@ export default class SearchModel {
         updatedAtStart,
         updatedAtEnd,
         priceMin,
-        priceMax
+        priceMax,
+        search
     ) {
         this.storeId = storeId;
         this.id = id;
@@ -58,5 +59,7 @@ export default class SearchModel {
 
         this.price_min = priceMin;
         this.price_max = priceMax;
+
+        this.search = search;
     }
 }

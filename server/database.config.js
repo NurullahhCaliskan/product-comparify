@@ -8,6 +8,7 @@ export let collections = {
     mailHistoryModel: null,
     contactSupportModel: null,
     productHistoryCrawlerQueueModel: null,
+    productMailHistoryModel: null,
     storeModel: null,
     storeUserModel: null,
 };
