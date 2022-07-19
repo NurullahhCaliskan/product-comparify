@@ -356,6 +356,8 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         let mailService = new MailService();
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+
+            console.log(session);
             let result = await mailService.getStoreMailByStoreId(session.onlineAccessInfo.associated_user.storeId);
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
