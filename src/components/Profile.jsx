@@ -1,4 +1,4 @@
-import { Page, Layout, ResourceList, TextField, Card, TextStyle, ResourceItem, Avatar, List, Stack, Icon, FormLayout, Button } from '@shopify/polaris';
+import { Page, Layout, ResourceList, TextField, Card, TextStyle, ResourceItem, Avatar, List, Stack, Icon, Toast, FormLayout, Button } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { useCallback, useState } from 'react';
 import { userLoggedInFetch } from '../App.jsx';
@@ -9,6 +9,13 @@ export function Profile() {
     const fetch = userLoggedInFetch(app);
 
     const [loading, setLoading] = useState(true);
+    const [sendLoading, setSendLoading] = useState(false);
+
+    //toast
+    const [activeToast, setActiveToast] = useState(false);
+    const [toastContent, setToastContent] = useState({ data: '', error: false });
+    const toggleActive = useCallback(() => setActiveToast((activeToast) => !activeToast), []);
+    const toastMarkup = activeToast ? <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive} /> : null;
 
     const getUrlList = async () => {
         setLoading(true);
@@ -28,14 +35,17 @@ export function Profile() {
     };
 
     const upsertEmail = async () => {
-        setLoading(true);
+        setSendLoading(true);
         const count = await fetch('/user-mail', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: emailMessage }),
         }).then((res) => res.json());
 
+        setToastContent({ data: 'Email Updated Successfully', error: false });
+        setActiveToast(true);
         console.log('here');
+        setSendLoading(false);
         await getUrlList();
     };
 
@@ -49,6 +59,7 @@ export function Profile() {
     const handleEmailChange = useCallback((value) => setEmailMessage(value), []);
     return (
         <Page fullWidth title="Profile">
+            {toastMarkup}
             <Layout>
                 <Layout.Section oneThird>
                     <Card>
@@ -156,7 +167,9 @@ export function Profile() {
                 <Stack alignment="center">
                     <TextField value={emailMessage} onChange={handleEmailChange} autoComplete="off" />
 
-                    <Button onClick={() => upsertEmail()}> Save</Button>
+                    <Button onClick={() => upsertEmail()} loading={sendLoading}>
+                        Save
+                    </Button>
                 </Stack>
             </Card>
         </Page>

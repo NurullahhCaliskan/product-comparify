@@ -8,10 +8,11 @@ import { Loading } from '../helper/Loading.jsx';
 export function Alarm() {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
+
+    //toast
     const [activeToast, setActiveToast] = useState(false);
     const [toastContent, setToastContent] = useState({ data: '', error: false });
     const toggleActive = useCallback(() => setActiveToast((activeToast) => !activeToast), []);
-
     const toastMarkup = activeToast ? <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive} /> : null;
 
     const [loadingUrl, setLoadingUrl] = useState(false);
@@ -54,7 +55,7 @@ export function Alarm() {
             setToastContent({ data: jsonValue.data, error: !response.ok });
             setActiveToast(true);
         } catch (error) {
-            setToastContent('error');
+            setToastContent({ data: 'data', error: true });
             setActiveToast(true);
         }
 
@@ -80,7 +81,12 @@ export function Alarm() {
 
             const jsonValue = await response.json(); // Get JSON value from the
 
-            setToastContent({ data: jsonValue.data, error: !response.ok });
+            if (item.alarm) {
+                setToastContent({ data: 'Deactivated successfully', error: !response.ok });
+            } else {
+                setToastContent({ data: 'Activated successfully', error: !response.ok });
+            }
+
             setActiveToast(true);
         } catch (error) {
             setToastContent('error');

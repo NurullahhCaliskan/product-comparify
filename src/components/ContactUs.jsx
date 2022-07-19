@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Button, Card, Form, Page, Select, TextField } from '@shopify/polaris';
+import { Button, Card, Form, Page, Select, TextField, Toast } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { userLoggedInFetch } from '../App.jsx';
 import { Loading } from '../helper/Loading.jsx';
@@ -9,6 +9,13 @@ export function ContactUs() {
     const fetch = userLoggedInFetch(app);
 
     const [loading, setLoading] = useState(true);
+    const [sendLoading, setSendLoading] = useState(false);
+
+    //toast
+    const [activeToast, setActiveToast] = useState(false);
+    const [toastContent, setToastContent] = useState({ data: '', error: false });
+    const toggleActive = useCallback(() => setActiveToast((activeToast) => !activeToast), []);
+    const toastMarkup = activeToast ? <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive} /> : null;
 
     const getUrlList = async () => {
         setLoading(true);
@@ -41,6 +48,8 @@ export function ContactUs() {
 
     const saveContactSupport = async () => {
         if (emailMessage && supportMessage) {
+            setSendLoading(true);
+
             const count = await fetch('/contact-support', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -50,10 +59,17 @@ export function ContactUs() {
                     message: supportMessage,
                 }),
             }).then((res) => res.json());
+
+            setToastContent({ data: 'Message sent', error: false });
+            setActiveToast(true);
+            setSupportMessage('');
+            setSendLoading(false);
         }
     };
     return (
         <Page title="Contact Us">
+            {toastMarkup}
+
             {loading ? (
                 loadingPageMarkup
             ) : (
@@ -65,7 +81,7 @@ export function ContactUs() {
                         <br />
                         <TextField label="Message" value={supportMessage} onChange={handleMessageChange} multiline={4} autoComplete="off" />
                         <br />
-                        <Button primary onClick={() => saveContactSupport()}>
+                        <Button primary onClick={() => saveContactSupport()} loading={sendLoading}>
                             Send
                         </Button>
                     </Form>

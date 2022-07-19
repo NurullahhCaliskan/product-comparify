@@ -11,7 +11,7 @@ export function Url() {
     const fetch = userLoggedInFetch(app);
 
     const [showedAddStoreCoverCounter, setShowedAddStoreCoverCounter] = useState(0);
-
+    const [sendLoading, setSendLoading] = useState(false);
     const [activeToast, setActiveToast] = useState(false);
     const [toastContent, setToastContent] = useState({ data: '', error: false });
 
@@ -101,6 +101,7 @@ export function Url() {
     const addNewUrl = async () => {
         //setLoadingUrl(true);
 
+        setSendLoading(true);
         try {
             let response = await fetch('/user-crawl-url', {
                 method: 'POST',
@@ -117,6 +118,7 @@ export function Url() {
             setActiveToast(true);
         }
 
+        setSendLoading(false);
         await getUrlList();
     };
 
@@ -181,7 +183,10 @@ export function Url() {
                                 <Stack>
                                     <TextField value={urlFieldValue} onChange={handleUrlFieldChange} />
 
-                                    <Button onClick={() => addNewUrl()}> Add</Button>
+                                    <Button onClick={() => addNewUrl()} loading={sendLoading}>
+                                        {' '}
+                                        Add
+                                    </Button>
                                 </Stack>
                             </Card>
 
