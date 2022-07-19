@@ -6,7 +6,7 @@ export default class MailRepository {
      * @param storeId storeId
      * @return {Promise<(Document & {_id: null})|{selectedMail: null}>} mail
      */
-    async getUpsertMailByStoreId(storeId) {
+    async getStoreMailByStoreId(storeId) {
         let query = { id: storeId };
 
         const options = { projection: { _id: 1, selectedMail: 1 } };

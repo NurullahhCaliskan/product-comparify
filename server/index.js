@@ -352,6 +352,17 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         return res.status(200).send(JSON.stringify({ data: 'Url deleted successfully' }));
     });
 
+    app.get('/user-mail', verifyRequest(app), async (req, res) => {
+        let mailService = new MailService();
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+            let result = await mailService.getStoreMailByStoreId(session.onlineAccessInfo.associated_user.storeId);
+            return res.status(200).send(JSON.stringify(result));
+        } catch (e) {
+            return res.status(422).send(e.message);
+        }
+    });
+
     app.post('/user-mail', verifyRequest(app), async (req, res) => {
         let mailValidator = new MailValidator();
         let mailService = new MailService();

@@ -26,6 +26,7 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
                 timestamp: Date.now(),
                 processingTime: Date.now() - requestStart,
                 browser: getBrowserName(req.headers['user-agent']),
+                start_date: new Date(),
                 method,
                 url,
                 httpVersion,

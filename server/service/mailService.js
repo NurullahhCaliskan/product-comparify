@@ -18,9 +18,9 @@ export default class MailService {
      * @param storeId storeId
      * @return {Promise<(Document&{_id: InferIdType<Document>})|{mail: null}>}
      */
-    async getUserMail(storeId) {
+    async getStoreMailByStoreId(storeId) {
         let mailRepository = new MailRepository();
 
-        return await mailRepository.getUpsertMailByStoreId(storeId);
+        return await mailRepository.getStoreMailByStoreId(storeId);
     }
 }
