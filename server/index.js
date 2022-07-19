@@ -55,7 +55,7 @@ async function loadDb() {
         collections.productMailHistoryModel = db.collection('product-mail-history');
         collections.logHistoryModel = db.collection('log-history');
 
-        console.log('success load db4');
+        console.log('success load db5');
         console.log(process.env.HOST.replace(/https:\/\//, ''));
     } catch (e) {
         console.log(e);
