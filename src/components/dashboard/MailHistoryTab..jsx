@@ -3,7 +3,7 @@ import { userLoggedInFetch } from '../../App.jsx';
 import { useEffect, useState } from 'react';
 import { Card, EmptySearchResult, IndexTable, Pagination, Tabs, TextStyle } from '@shopify/polaris';
 
-export function MailHistoryTab() {
+export function MailHistoryTab({ selectedDayIndex }) {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
 
@@ -15,7 +15,11 @@ export function MailHistoryTab() {
 
     const getMailHistory = async () => {
         setLoadingUrl(true);
-        const response = await fetch('/get-mail-history').then((res) => res.json());
+        const response = await fetch('/get-mail-history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date_type: parseInt(selectedDayIndex) }),
+        }).then((res) => res.json());
         setLoadingUrl(false);
         setMailList(response);
     };
@@ -29,6 +33,11 @@ export function MailHistoryTab() {
     useEffect(async () => {
         await getMailHistory();
     }, []);
+
+    useEffect(async () => {
+        console.log('useEffect logic ran');
+        await getMailHistory();
+    }, [selectedDayIndex]);
 
     const setPage = (index) => {
         let maxIndex = Math.ceil(mailList.length / 10) - 1;
@@ -77,8 +86,8 @@ export function MailHistoryTab() {
             : '';
 
     const resourceName = {
-        singular: 'website',
-        plural: 'websites',
+        singular: 'mail',
+        plural: 'mails',
     };
 
     const emptyStateMarkup = <EmptySearchResult title={'No mail yet'} withIllustration />;

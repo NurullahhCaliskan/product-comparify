@@ -1,15 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Card, Tabs } from '@shopify/polaris';
 import { MailHistoryTab } from './MailHistoryTab.';
 import { ProductMailHistoryTab } from './ProductMailHistoryTab..jsx';
 
-export function Tab() {
+export function Tab({ selectedDayIndex }) {
     const [selected, setSelected] = useState(0);
 
     const handleTabChange = useCallback((selectedTabIndex) => {
         setSelected(selectedTabIndex);
         console.log(selected);
     }, []);
+
+    useEffect(() => {
+        console.log('useEffect logic ran');
+    }, [selectedDayIndex]);
 
     const tabs = [
         {
@@ -29,10 +33,10 @@ export function Tab() {
         <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange} fitted>
             <Card.Section>
                 <div style={{ display: selected === 0 ? 'block' : 'none' }}>
-                    <MailHistoryTab />
+                    <MailHistoryTab selectedDayIndex={selectedDayIndex} />
                 </div>
                 <div style={{ display: selected === 1 ? 'block' : 'none' }}>
-                    <ProductMailHistoryTab />
+                    <ProductMailHistoryTab selectedDayIndex={selectedDayIndex} />
                 </div>
             </Card.Section>
         </Tabs>

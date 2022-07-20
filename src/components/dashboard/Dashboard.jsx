@@ -1,4 +1,4 @@
-import { Card, Icon, Layout, Page, ResourceItem, ResourceList, TextStyle } from '@shopify/polaris';
+import { Card, Icon, Layout, Page, ResourceItem, ResourceList, Select, TextStyle } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { useCallback, useEffect, useState } from 'react';
 import { userLoggedInFetch } from '../../App.jsx';
@@ -12,12 +12,13 @@ export function Dashboard() {
 
     const [loading, setLoading] = useState(true);
     const [dashboardResult, setDashboardResult] = useState(true);
+    const [selected, setSelected] = useState('0');
 
     const getUrlList = async () => {
         let dashboardResult = await fetch('/dashboard-info', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ date_type: 1 }),
+            body: JSON.stringify({ date_type: parseInt(selected) }),
         }).then((res) => res.json());
 
         setLoading(false);
@@ -29,8 +30,23 @@ export function Dashboard() {
         await getUrlList();
     }, []);
 
+    useEffect(async () => {
+        setSelected(selected);
+        await getUrlList();
+    }, [selected]);
+
+    const handleSelectChange = useCallback(async (value) => {
+        setSelected(value);
+    }, []);
+
+    const options = [
+        { label: 'Today', value: '0' },
+        { label: 'Last 7 days', value: '1' },
+        { label: 'Last 30 days', value: '2' },
+    ];
+
     return (
-        <Page fullWidth title="Dashboard">
+        <Page fullWidth title="Dashboard" primaryAction={<Select label="Date range" options={options} onChange={handleSelectChange} value={selected} />}>
             {loading ? (
                 <Loading />
             ) : (
@@ -164,7 +180,7 @@ export function Dashboard() {
                     <br />
                     <br />
                     <Card>
-                        <Tab />
+                        <Tab selectedDayIndex={selected} />
                     </Card>
                 </div>
             )}

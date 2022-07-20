@@ -13,10 +13,10 @@ export function getTodayMidnight() {
     return date;
 }
 
-export function get7dayMidnight() {
+export function getSelectedDayAgo(dayAgo) {
     let date = new Date();
     date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() - 7);
+    date.setDate(date.getDate() - dayAgo);
     return date;
 }
 

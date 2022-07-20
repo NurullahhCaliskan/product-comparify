@@ -1,5 +1,5 @@
 import DashboardRepository from '../repository/dashboardRepository.js';
-import { get7dayMidnight, getTodayMidnight, getYesterdayMidnight } from '../utility/dayUtility.js';
+import { getSelectedDayAgo, getTodayMidnight } from '../utility/dayUtility.js';
 
 export default class DashboardService {
     /***
@@ -14,16 +14,14 @@ export default class DashboardService {
 
         //
         //today
-        if (dateType === 1) {
+        if (dateType === 0) {
             date = getTodayMidnight();
         }
-        //yesterday
-        if (dateType === 2) {
-            date = getYesterdayMidnight();
+        if (dateType === 1) {
+            date = getSelectedDayAgo(7);
         }
-        //7 day
-        if (dateType === 3) {
-            date = get7dayMidnight();
+        if (dateType === 2) {
+            date = getSelectedDayAgo(30);
         }
 
         let storeMailItemSendCount = await dashboardRepository.getStoreMailItemSendCount(storeId, date);

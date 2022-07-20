@@ -128,14 +128,16 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     });
 
     app.use(express.json());
-    app.get('/get-mail-history', verifyRequest(app), async (req, res) => {
+    app.post('/get-mail-history', verifyRequest(app), async (req, res) => {
         let response = [];
         try {
+            let body = req.body;
+
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
             let mailHistoryService = new MailHistoryService();
 
-            response = await mailHistoryService.getMailHistoryByUserid(session.onlineAccessInfo.associated_user.storeId);
+            response = await mailHistoryService.getMailHistoryByUserid(session.onlineAccessInfo.associated_user.storeId, body.date_type);
         } catch (e) {
             console.log(e);
         }

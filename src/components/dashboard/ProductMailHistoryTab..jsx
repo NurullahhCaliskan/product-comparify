@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, EmptySearchResult, Icon, IndexTable, Link, Pagination, TextStyle } from '@shopify/polaris';
 import { ProductsMajor } from '@shopify/polaris-icons';
 
-export function ProductMailHistoryTab() {
+export function ProductMailHistoryTab({ selectedDayIndex }) {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
 
@@ -19,7 +19,7 @@ export function ProductMailHistoryTab() {
         let response = await fetch('/product-mail-history-info', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ date_type: 3 }),
+            body: JSON.stringify({ date_type: parseInt(selectedDayIndex) }),
         }).then((res) => res.json());
         setLoadingUrl(false);
         setProductMailList(response);
@@ -30,6 +30,11 @@ export function ProductMailHistoryTab() {
     useEffect(() => {
         setPage(0);
     }, [productMailList]);
+
+    useEffect(async () => {
+        console.log('useEffect logic ran');
+        await getProductMailHistory();
+    }, [selectedDayIndex]);
 
     useEffect(async () => {
         await getProductMailHistory();
@@ -90,15 +95,17 @@ export function ProductMailHistoryTab() {
                           After Price: <TextStyle variation="strong"> {priceWithCurrency(newValue, currency)}</TextStyle>
                       </IndexTable.Cell>
                       <IndexTable.Cell>
-                          <Link url={url}>Go to Product</Link>
+                          <Link url={url} external={true}>
+                              Go to Product
+                          </Link>
                       </IndexTable.Cell>
                   </IndexTable.Row>
               ))
             : '';
 
     const resourceName = {
-        singular: 'website',
-        plural: 'websites',
+        singular: 'productMail',
+        plural: 'productMails',
     };
 
     const emptyStateMarkup = <EmptySearchResult title={'No product yet'} withIllustration />;
