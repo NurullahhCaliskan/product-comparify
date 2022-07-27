@@ -1,9 +1,20 @@
-import { collections } from "../database.config.js";
+import { collections } from '../database.config.js';
 
 export default class ContactSupportRepository {
-    async saveContactRepository(userId, subject, message) {
-        let resultJson = {userId: userId, subject: subject, message: message}
+    /***
+     * save contact
+     * @param userId
+     * @param subject
+     * @param message
+     * @param topic
+     * @return {Promise<void>}
+     */
+    async saveContactRepository(userId, subject, message, topic) {
+        let resultJson = { userId: userId, subject: subject, message: message, topic: topic };
 
-        await collections.contactSupportModel.insertOne(resultJson).then(res => res).catch(e => e)
+        await collections.contactSupportModel
+            .insertOne(resultJson)
+            .then((res) => res)
+            .catch((e) => e);
     }
 }

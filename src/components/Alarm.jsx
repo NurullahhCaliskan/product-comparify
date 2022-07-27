@@ -1,202 +1,161 @@
-import { useCallback, useRef, useState } from "react";
-import {
-    ContextualSaveBar, Toast, TopBar, ActionList, Navigation, Page, Loading, Card, FormLayout, TextField, SkeletonPage, Layout,
-    AppProvider, Frame, TextContainer, SkeletonDisplayText, SkeletonBodyText, Modal, Button, ResourceList,
-    TextStyle, Avatar, Icon, Checkbox, IndexTable, RangeSlider
-} from "@shopify/polaris"
-import { ArrowLeftMinor, ConversationMinor, HomeMajor, OrdersMajor, DeleteMinor, CircleCancelMinor, CircleTickMinor } from '@shopify/polaris-icons';
-import { userLoggedInFetch } from "../App";
-import { useAppBridge } from "@shopify/app-bridge-react";
+import { useCallback, useState } from 'react';
+import { Avatar, Banner, Button, Card, Icon, IndexTable, Page, RangeSlider, TextStyle, Toast } from '@shopify/polaris';
+import { CircleCancelMinor, CircleTickMinor, DomainsMajor } from '@shopify/polaris-icons';
+import { userLoggedInFetch } from '../App';
+import { useAppBridge } from '@shopify/app-bridge-react';
+import { Loading } from '../helper/Loading.jsx';
 
 export function Alarm() {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
+
+    //toast
     const [activeToast, setActiveToast] = useState(false);
-    const [toastContent, setToastContent] = useState({data: "", error: false});
+    const [toastContent, setToastContent] = useState({ data: '', error: false });
     const toggleActive = useCallback(() => setActiveToast((activeToast) => !activeToast), []);
-
-
-    const toastMarkup = activeToast ? (
-        <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive}/>
-    ) : null;
+    const toastMarkup = activeToast ? <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive} /> : null;
 
     const [loadingUrl, setLoadingUrl] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(true);
 
     const getUrlList = async () => {
-        setLoadingUrl(true)
-        const response = await fetch("/user-crawl-url").then((res) => res.json());
+        setLoadingUrl(true);
+        const response = await fetch('/user-crawl-url').then((res) => res.json());
 
         setUrlList(response);
 
-        setLoadingUrl(false)
-    }
-
-    const defaultState = useRef({
-        urlFieldValue: 'www.shopify.com'
-    });
-
-    const [urlFieldValue, setUrlFieldValue] = useState(defaultState.current.urlFieldValue);
+        setLoadingUrl(false);
+        setLoadingPage(false);
+    };
 
     const [urlList, setUrlList] = useState(getUrlList);
 
-
-    const skipToContentRef = useRef(null);
-    const skipToContentTarget = (
-        <a id="SkipToContentTarget" ref={skipToContentRef} tabIndex={-1}/>
-    );
-
-    const handleUrlFieldChange = useCallback((value) => {
-        setUrlFieldValue(value);
-        value && setIsDirty(true);
-    }, []);
-
-    const [isDirty, setIsDirty] = useState(false);
-
     const radioButtonKeyListener = async (item) => {
-        console.log(item)
+        console.log(item);
 
         if (loadingUrl) {
             return;
         }
 
-        setLoadingUrl(true)
+        setLoadingUrl(true);
 
         try {
-            let response = await fetch("/user-crawl-url", {
-                method: 'PUT', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: item.website, alarm: item.alarm, value: item.value})
-            })
+            let response = await fetch('/user-crawl-url', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: item.website,
+                    alarm: item.alarm,
+                    value: item.value,
+                }),
+            });
 
             const jsonValue = await response.json(); // Get JSON value from the
 
-            setToastContent({data: jsonValue.data, error: !response.ok})
-            setActiveToast(true)
-
+            setToastContent({ data: jsonValue.data, error: !response.ok });
+            setActiveToast(true);
         } catch (error) {
-            setToastContent("error")
-            setActiveToast(true)
+            setToastContent({ data: 'data', error: true });
+            setActiveToast(true);
         }
 
         await getUrlList();
-    }
+    };
     const updateAlarm = async (item) => {
         if (loadingUrl) {
             return;
         }
 
-        setLoadingUrl(true)
+        setLoadingUrl(true);
 
         try {
-            let response = await fetch("/user-crawl-url", {
-                method: 'PUT', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: item.website, alarm: !item.alarm, value: item.value})
-            })
+            let response = await fetch('/user-crawl-url', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: item.website,
+                    alarm: !item.alarm,
+                    value: item.value,
+                }),
+            });
 
             const jsonValue = await response.json(); // Get JSON value from the
 
-            setToastContent({data: jsonValue.data, error: !response.ok})
-            setActiveToast(true)
+            if (item.alarm) {
+                setToastContent({ data: 'Deactivated successfully', error: !response.ok });
+            } else {
+                setToastContent({ data: 'Activated successfully', error: !response.ok });
+            }
 
+            setActiveToast(true);
         } catch (error) {
-            setToastContent("error")
-            setActiveToast(true)
+            setToastContent('error');
+            setActiveToast(true);
         }
 
         await getUrlList();
-    }
+    };
 
-
-    const [rangeValue, setRangeValue2] = useState([{myValue: 10}]);
-
+    const [rangeValue, setRangeValue2] = useState([{ myValue: 10 }]);
 
     const setRangeValue = (e, index) => {
-        setRangeValue2([{myValue: e}])
+        setRangeValue2([{ myValue: e }]);
 
-        let newUrlList = urlList
-        newUrlList[index].value = e
+        let newUrlList = urlList;
+        newUrlList[index].value = e;
 
-        setUrlList(newUrlList)
-    }
+        setUrlList(newUrlList);
+    };
     const resourceName = {
         singular: 'website',
         plural: 'websites',
     };
 
-
     const suffixStyles = {
         minWidth: '24px',
         textAlign: 'right',
     };
-    const rowMarkup = urlList && urlList.length > 0 ? urlList.map(
-        ({id, website, websites, location, alarm, amountSpent, value}, index) => (
-            <IndexTable.Row
-                id={id}
-                key={id}
-                position={index}
+    const rowMarkup =
+        urlList && urlList.length > 0
+            ? urlList.map(({ id, website, websites, location, alarm, amountSpent, value }, index) => (
+                  <IndexTable.Row id={id} key={id} position={index}>
+                      <IndexTable.Cell>
+                          <Avatar customer size="medium" name={website} source={websites && websites.faviconUrl ? websites.faviconUrl : 'https://polaris.shopify.com/icons/DomainsMajor.svg'} />
+                      </IndexTable.Cell>
+                      <IndexTable.Cell>
+                          <TextStyle variation="strong">{website}</TextStyle>
+                      </IndexTable.Cell>
+                      <IndexTable.Cell>
+                          <div onClickCapture={() => radioButtonKeyListener(urlList[index])}>
+                              <RangeSlider min={1} max={100} value={value} onChange={(e) => setRangeValue(e, index)} suffix={<p style={suffixStyles}>{value}</p>} output disabled={!alarm} />
+                          </div>
+                      </IndexTable.Cell>
+                      <IndexTable.Cell>
+                          <Button onClick={() => updateAlarm(urlList[index])} primary={!alarm} secondary={alarm}>
+                              {!alarm ? 'Activated' : 'Deactivated'}
+                          </Button>
+                      </IndexTable.Cell>
+                      <IndexTable.Cell>{amountSpent}</IndexTable.Cell>
+                  </IndexTable.Row>
+              ))
+            : '';
 
-            >
-                <IndexTable.Cell>
-                    <Avatar customer size="medium" name={website} source={websites?.faviconUrl}/>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <TextStyle variation="strong">{website}</TextStyle>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <div onClickCapture={() => radioButtonKeyListener(urlList[index])}>
-                        <RangeSlider
-                            min={-50}
-                            max={100}
-                            value={value}
-                            onChange={(e) => setRangeValue(e, index)}
-                            suffix={<p style={suffixStyles}>{value}</p>}
-                            output
-                            disabled={!alarm}
-                        />
-                    </div>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <div onClick={() => updateAlarm(urlList[index])}>
-                        <Icon
-                            source={alarm ? CircleTickMinor : CircleCancelMinor}
-
-                        />
-                    </div>
-                </IndexTable.Cell>
-                <IndexTable.Cell>{amountSpent}</IndexTable.Cell>
-            </IndexTable.Row>
-        ),
-    ) : "";
-
-    return (<div>
-
-        {toastMarkup}
-
-        <Page title="Alarm">
-            <Layout>
-                {skipToContentTarget}
-                <Layout.AnnotatedSection
-                    title="Alarm Configurations"
-                    description="You can manage an alarm according to the website you want."
-                >
+    return (
+        <Page title="Alarm" subtitle="Manage an alarm according to the website.">
+            {toastMarkup}
+            {loadingPage ? (
+                <Loading />
+            ) : (
+                <div>
+                    <Banner title="Alarm system working every 12:00AM GMT+1. Mail will be sent the next day." status="warning" />
+                    <br />
                     <Card>
-                        <IndexTable
-                            loading={loadingUrl}
-                            resourceName={resourceName}
-                            itemCount={urlList?.length}
-                            selectable={false}
-                            headings={[
-                                {title: 'Icon'},
-                                {title: 'Website'},
-                                {title: 'Send Alarm When %x Price'},
-                                {title: 'Alarm Status'},
-                            ]}
-                        >
+                        <IndexTable loading={loadingUrl} resourceName={resourceName} itemCount={urlList?.length} selectable={false} headings={[{ title: '' }, { title: 'Website' }, { title: 'Alert at Least%' }, { title: 'Alarm Status' }]}>
                             {rowMarkup}
                         </IndexTable>
                     </Card>
-
-                </Layout.AnnotatedSection>
-            </Layout>
+                </div>
+            )}
         </Page>
-    </div>)
+    );
 }

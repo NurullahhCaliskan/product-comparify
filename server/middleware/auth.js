@@ -1,42 +1,27 @@
-import { Shopify } from "@shopify/shopify-api";
+import { Shopify } from '@shopify/shopify-api';
 
-import topLevelAuthRedirect from "../helpers/top-level-auth-redirect.js";
-import SessionService from "../service/sessionService.js";
+import topLevelAuthRedirect from '../helpers/top-level-auth-redirect.js';
+import SessionService from '../service/sessionService.js';
 
 export default function applyAuthMiddleware(app) {
-    app.get("/auth", async (req, res) => {
-        console.log('auth')
-        console.log('geliyor')
-
-        if (!req.signedCookies[app.get("top-level-oauth-cookie")]) {
-            return res.redirect(
-                `/auth/toplevel?${new URLSearchParams(req.query).toString()}`
-            );
+    app.get('/auth', async (req, res) => {
+        if (!req.signedCookies[app.get('top-level-oauth-cookie')]) {
+            return res.redirect(`/auth/toplevel?${new URLSearchParams(req.query).toString()}`);
         }
 
-        const redirectUrl = await Shopify.Auth.beginAuth(
-            req,
-            res,
-            req.query.shop,
-            "/auth/callback",
-            app.get("use-online-tokens")
-        );
+        const redirectUrl = await Shopify.Auth.beginAuth(req, res, req.query.shop, '/auth/callback', app.get('use-online-tokens'));
 
-
-        console.log("redirectUrl")
-        console.log(redirectUrl)
         res.redirect(redirectUrl);
     });
 
-    app.get("/auth/toplevel", (req, res) => {
-        console.log("/auth/toplevel")
-        res.cookie(app.get("top-level-oauth-cookie"), "1", {
+    app.get('/auth/toplevel', (req, res) => {
+        res.cookie(app.get('top-level-oauth-cookie'), '1', {
             signed: true,
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: 'strict',
         });
 
-        res.set("Content-Type", "text/html");
+        res.set('Content-Type', 'text/html');
 
         res.send(
             topLevelAuthRedirect({
@@ -48,22 +33,21 @@ export default function applyAuthMiddleware(app) {
         );
     });
 
-    app.get("/auth/callback", async (req, res) => {
-        console.log("/auth/callback")
+    app.get('/auth/callback', async (req, res) => {
         try {
-            const session = await Shopify.Auth.validateAuthCallback(
-                req,
-                res,
-                req.query
-            );
+            const session = await Shopify.Auth.validateAuthCallback(req, res, req.query);
+
+            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
+
+            const clientResponse = await client.get({ path: 'shop' });
 
             let sessionService = new SessionService();
-            sessionService.session(session)
+            await sessionService.saveSession(clientResponse.body.shop, session);
 
             const host = req.query.host;
             app.set(
-                "active-shopify-shops",
-                Object.assign(app.get("active-shopify-shops"), {
+                'active-shopify-shops',
+                Object.assign(app.get('active-shopify-shops'), {
                     [session.shop]: session.scope,
                 })
             );
@@ -71,14 +55,12 @@ export default function applyAuthMiddleware(app) {
             const response = await Shopify.Webhooks.Registry.register({
                 shop: session.shop,
                 accessToken: session.accessToken,
-                topic: "APP_UNINSTALLED",
-                path: "/webhooks",
+                topic: 'APP_UNINSTALLED',
+                path: '/webhooks',
             });
 
-            if (!response["APP_UNINSTALLED"].success) {
-                console.log(
-                    `Failed to register APP_UNINSTALLED webhook: ${response.result}`
-                );
+            if (!response['APP_UNINSTALLED'].success) {
+                console.log(`Failed to register APP_UNINSTALLED webhook: ${response.result}`);
             }
 
             // Redirect to app with shop parameter upon auth

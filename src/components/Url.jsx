@@ -1,48 +1,66 @@
-import { useCallback, useRef, useState } from "react";
-import {
-    ContextualSaveBar, Toast, TopBar, ActionList, Navigation, Page, Loading, Card, FormLayout, TextField, SkeletonPage, Layout,
-    AppProvider, Frame, TextContainer, SkeletonDisplayText, SkeletonBodyText, Modal, Button, ResourceList, TextStyle, Avatar, Icon
-} from "@shopify/polaris"
-import { ArrowLeftMinor, ConversationMinor, HomeMajor, OrdersMajor, DeleteMinor } from '@shopify/polaris-icons';
-import { userLoggedInFetch } from "../App";
-import { useAppBridge } from "@shopify/app-bridge-react";
+import { useCallback, useEffect, useState } from 'react';
+import { Avatar, Button, Card, EmptySearchResult, EmptyState, Page, Pagination, ResourceList, Stack, TextField, TextStyle, Toast } from '@shopify/polaris';
+import { DeleteMinor } from '@shopify/polaris-icons';
+import { userLoggedInFetch } from '../App';
+import { useAppBridge } from '@shopify/app-bridge-react';
+import { Loading } from '../helper/Loading.jsx';
+import addStore from '../assets/addstore.svg';
 
 export function Url() {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
+
+    const [showedAddStoreCoverCounter, setShowedAddStoreCoverCounter] = useState(0);
+    const [sendLoading, setSendLoading] = useState(false);
     const [activeToast, setActiveToast] = useState(false);
-    const [toastContent, setToastContent] = useState({data: "", error: false});
+    const [toastContent, setToastContent] = useState({ data: '', error: false });
+
+    const [pageIndex, setPageIndex] = useState(0);
+    const [minPageIndex, setMinPageIndex] = useState(true);
+    const [maxPageIndex, setMaxPageIndex] = useState(true);
+
     const toggleActive = useCallback(() => setActiveToast((activeToast) => !activeToast), []);
 
+    const toastMarkup = activeToast ? <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive} /> : null;
 
-    const toastMarkup = activeToast ? (
-        <Toast content={toastContent.data} error={toastContent.error} onDismiss={toggleActive}/>
-    ) : null;
-
-    const [loadingUrl, setLoadingUrl] = useState(false);
-
+    const [loadingUrl, setLoadingUrl] = useState(true);
+    const [showUrls, setShowUrls] = useState(true);
+    const [selectedItems, setSelectedItems] = useState([]);
     const getUrlList = async () => {
-
-        const response = await fetch("/user-crawl-url").then((res) => res.json());
+        const response = await fetch('/user-crawl-url').then((res) => res.json());
 
         setUrlList(response);
 
-        setLoadingUrl(false)
-    }
+        console.log(showedAddStoreCoverCounter);
 
-    const defaultState = useRef({
-        urlFieldValue: 'www.shopify.com'
-    });
+        if (response.length === 0) {
+            if (showedAddStoreCoverCounter === 0) {
+                setShowedAddStoreCoverCounter(showedAddStoreCoverCounter + 1);
+                setShowUrls(false);
+            }
+        }
+        setLoadingUrl(false);
 
-    const [urlFieldValue, setUrlFieldValue] = useState(defaultState.current.urlFieldValue);
+        setSelectedItems([]);
+        setUrlFieldValue('www.shopify.com');
+    };
+
+    const [urlFieldValue, setUrlFieldValue] = useState('www.shopify.com');
 
     const [urlList, setUrlList] = useState(getUrlList);
 
+    const resourceName = {
+        singular: 'url',
+        plural: 'urls',
+    };
 
-    const skipToContentRef = useRef(null);
-    const skipToContentTarget = (
-        <a id="SkipToContentTarget" ref={skipToContentRef} tabIndex={-1}/>
-    );
+    const changeShowList = () => {
+        setShowUrls(true);
+    };
+
+    useEffect(() => {
+        setPage(0);
+    }, [urlList]);
 
     const handleUrlFieldChange = useCallback((value) => {
         setUrlFieldValue(value);
@@ -51,95 +69,159 @@ export function Url() {
 
     const [isDirty, setIsDirty] = useState(false);
 
-    const removeUrl = async (item) => {
+    useEffect(() => {
+        setShowedAddStoreCoverCounter(showedAddStoreCoverCounter);
+    }, [showedAddStoreCoverCounter]);
+
+    useEffect(() => {
+        setUrlList(urlList);
+    }, [urlList]);
+
+    const removeUrl = async () => {
         setLoadingUrl(true);
         try {
-            let response = await fetch("/user-crawl-url?id=" + JSON.stringify(item._id), {
-                method: 'DELETE', headers: {'Content-Type': 'application/json'},
-            })
+            let response = await fetch('/user-crawl-url-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ urls: selectedItems }),
+            });
 
             const jsonValue = await response.json(); // Get JSON value from the
 
-            setToastContent({data: jsonValue.data, error: !response.ok})
-            setActiveToast(true)
+            setToastContent({ data: jsonValue.data, error: !response.ok });
+            setActiveToast(true);
         } catch (error) {
-            setToastContent("error")
-            setActiveToast(true)
+            setToastContent('error');
+            setActiveToast(true);
         }
 
-
         await getUrlList();
-    }
+    };
 
     const addNewUrl = async () => {
-        setLoadingUrl(true)
+        //setLoadingUrl(true);
 
+        setSendLoading(true);
         try {
-            let response = await fetch("/user-crawl-url", {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: urlFieldValue})
-            })
+            let response = await fetch('/user-crawl-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: urlFieldValue }),
+            });
 
             const jsonValue = await response.json(); // Get JSON value from the
 
-            setToastContent({data: jsonValue.data, error: !response.ok})
-            setActiveToast(true)
-
+            setToastContent({ data: jsonValue.data, error: !response.ok });
+            setActiveToast(true);
         } catch (error) {
-            setToastContent("error")
-            setActiveToast(true)
+            setToastContent('error');
+            setActiveToast(true);
         }
 
+        setSendLoading(false);
         await getUrlList();
+    };
+
+    const setPage = (index) => {
+        let maxIndex = Math.ceil(urlList.length / 10) - 1;
+
+        if (index < 0) {
+            index = 0;
+        }
+
+        if (index > maxIndex) {
+            index = maxIndex;
+        }
+
+        if (index === 0) {
+            setMinPageIndex(true);
+        } else {
+            setMinPageIndex(false);
+        }
+
+        if (index === maxIndex) {
+            setMaxPageIndex(true);
+        } else {
+            setMaxPageIndex(false);
+        }
+
+        setPageIndex(index);
+    };
+
+    //MARKUPS
+
+    const emptyStateMarkup = <EmptySearchResult title={'No Store Found'} withIllustration />;
+
+    const promotedBulkActions = [
+        {
+            content: 'Remove Stores',
+            onAction: () => removeUrl(),
+        },
+    ];
+
+    function resolveItemIds({ id }) {
+        return id;
     }
 
+    return (
+        <div>
+            {toastMarkup}
 
-    return (<div>
+            {loadingUrl ? (
+                <Loading />
+            ) : (
+                <Page title="Add Store" subtitle="Enter the link of the stores you want to follow below. Add to your list by clicking the button." fullWidth>
+                    {showUrls === false ? (
+                        <Card sectioned>
+                            <EmptyState heading="Add a url to get started" action={{ content: 'Add Store', onAction: () => changeShowList() }} image={addStore} fullWidth>
+                                <p>Don't have a store which you follow yet. Click to add a store to your watch list</p>
+                            </EmptyState>
+                        </Card>
+                    ) : (
+                        <div>
+                            <Card sectioned title="Store Url">
+                                <Stack>
+                                    <TextField value={urlFieldValue} onChange={handleUrlFieldChange} />
 
-        {toastMarkup}
+                                    <Button onClick={() => addNewUrl()} loading={sendLoading}>
+                                        {' '}
+                                        Add
+                                    </Button>
+                                </Stack>
+                            </Card>
 
-        <Page title="Url">
-            <Layout>
-                {skipToContentTarget}
-                <Layout.AnnotatedSection
-                    title="Url details"
-                    description="Please add url which your want to notify."
-                >
-                    <Card>
-                        <ResourceList
-                            showHeader
-                            items={urlList}
-                            loading={loadingUrl}
-                            renderItem={(item) => {
-                                const {id, url, website} = item;
-                                const media = <Avatar customer size="medium" name={website} source={item.websites.faviconUrl}/>;
-                                const shortcutActions = [{icon: DeleteMinor, onClick: () => removeUrl(item)}]
-                                return (
-                                    <ResourceList.Item id={id} url={url} media={media} shortcutActions={shortcutActions} persistActions>
-                                        <h3>
-                                            <TextStyle variation="strong">{website}</TextStyle>
-                                        </h3>
-                                    </ResourceList.Item>
+                            <Card sectioned>
+                                <ResourceList
+                                    resourceName={resourceName}
+                                    selectedItems={selectedItems}
+                                    promotedBulkActions={promotedBulkActions}
+                                    onSelectionChange={setSelectedItems}
+                                    resolveItemId={resolveItemIds}
+                                    emptyState={emptyStateMarkup}
+                                    showHeader
+                                    items={urlList && urlList.length > 0 ? urlList.slice(10 * pageIndex, 10 * pageIndex + 10) : []}
+                                    loading={loadingUrl}
+                                    renderItem={(item) => {
+                                        const { id, url, website } = item;
+                                        const media = <Avatar customer size="medium" name={website} source={item.websites.faviconUrl ? item.websites.faviconUrl : 'https://polaris.shopify.com/icons/DomainsMajor.svg'} />;
+                                        return (
+                                            <ResourceList.Item id={id} url={url} media={media} persistActions>
+                                                <h3>
+                                                    <TextStyle variation="strong">{website}</TextStyle>
+                                                </h3>
+                                            </ResourceList.Item>
+                                        );
+                                    }}
+                                />
 
-                                );
-                            }}
-                        />
-                    </Card>
-
-
-                    <Card sectioned>
-                        <FormLayout>
-                            <TextField
-                                label="Url"
-                                value={urlFieldValue}
-                                onChange={handleUrlFieldChange}
-                            />
-
-                            <Button onClick={() => addNewUrl()}> Add</Button>
-                        </FormLayout>
-                    </Card>
-                </Layout.AnnotatedSection>
-            </Layout>
-        </Page>
-    </div>)
+                                <div style={{ marginLeft: '45%' }}>
+                                    <Pagination nextTooltip={'Next'} previousTooltip={'Previous'} onPrevious={() => setPage(pageIndex - 1)} onNext={() => setPage(pageIndex + 1)} hasPrevious={!minPageIndex} hasNext={!maxPageIndex} />
+                                </div>
+                            </Card>
+                        </div>
+                    )}
+                </Page>
+            )}
+        </div>
+    );
 }

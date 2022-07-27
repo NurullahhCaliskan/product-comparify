@@ -1,16 +1,15 @@
-import * as mongoDB from "mongodb";
+import * as mongoDB from 'mongodb';
 
-
-export  let collections = {
-    userWebsitesRelationModel: null,
+export let collections = {
+    storeWebsitesRelationModel: null,
     websitesModel: null,
     productHistoryModel: null,
-    userModel: null,
     userSessionModel: null,
     mailHistoryModel: null,
-    contactSupportModel: null
-}
-
-
-
-
+    contactSupportModel: null,
+    productHistoryCrawlerQueueModel: null,
+    productMailHistoryModel: null,
+    storeModel: null,
+    storeUserModel: null,
+    logHistoryModel: null,
+};

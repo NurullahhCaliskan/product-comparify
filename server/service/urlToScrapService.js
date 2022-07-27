@@ -1,28 +1,26 @@
-import UrlToScrapRepository from "../repository/urlToScrapRepository.js";
-import { urlFormatter } from "../utility/stringUtility.js";
+import UrlToScrapRepository from '../repository/urlToScrapRepository.js';
+import { urlFormatter } from '../utility/stringUtility.js';
 
 export default class UrlToScrapService {
-
     /***
      * add url to scrap service
      * @param url url
-     * @param userid userid
+     * @param storeId storeId
      */
-    async addUrlToScrapService(url, userid) {
-
-        url = urlFormatter(url)
+    async addUrlToScrapService(url, storeId) {
+        url = urlFormatter(url);
         let urlToScrapRepository = new UrlToScrapRepository();
-        await urlToScrapRepository.addUrlToScrapRepository(url, userid);
+        await urlToScrapRepository.addUrlToScrapRepository(url, storeId);
     }
 
     /***
      * update url
      * @param body request body
-     * @param userid userid
+     * @param storeId storeId
      */
-    async updateUrl(body, userid) {
+    async updateUrl(body, storeId) {
         let urlToScrapRepository = new UrlToScrapRepository();
-        await urlToScrapRepository.upsertUrlRepository(body, userid);
+        await urlToScrapRepository.upsertUrlRepository(body, storeId);
     }
 
     /***
@@ -38,22 +36,22 @@ export default class UrlToScrapService {
     /***
      * user url exist check
      * @param url url
-     * @param userid userid
+     * @param storeId storeId
      * @return {Promise<void>}
      */
-    async isExistsUserToUrlRelation(url, userid) {
-        url=urlFormatter(url)
+    async isExistsUserToUrlRelation(url, storeId) {
+        url = urlFormatter(url);
         let urlToScrapRepository = new UrlToScrapRepository();
-        await urlToScrapRepository.isExistsUserToUrlRelation(url, userid);
+        await urlToScrapRepository.isExistsUserToUrlRelation(url, storeId);
     }
 
     /***
-     * get url by userid
-     * @param userid userid
+     * get url by storeId
+     * @param storeId storeId
      * @return {Promise<undefined|*|[]>}
      */
-    async getUrlToScrapService(userid) {
+    async getUrlToScrapService(storeId) {
         let urlToScrapRepository = new UrlToScrapRepository();
-        return await urlToScrapRepository.getUserToUrlRelation(userid);
+        return await urlToScrapRepository.getUserToUrlRelation(storeId);
     }
 }

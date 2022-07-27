@@ -1,9 +1,14 @@
-
-import SessionRepository from "../repository/session.js";
+import SessionRepository from '../repository/sessionRepository.js';
 
 export default class SessionService {
-    session (session){
+    /***
+     * save session
+     * @param client
+     * @param session
+     * @return {Promise<void>}
+     */
+    async saveSession(client, session) {
         let sessionRepository = new SessionRepository();
-        sessionRepository.session(session);
+        await sessionRepository.saveSession(client, session);
     }
 }
