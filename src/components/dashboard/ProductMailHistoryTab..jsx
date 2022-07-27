@@ -3,6 +3,7 @@ import { userLoggedInFetch } from '../../App.jsx';
 import { useEffect, useState } from 'react';
 import { Card, EmptySearchResult, Icon, IndexTable, Link, Pagination, TextStyle } from '@shopify/polaris';
 import { ProductsMajor } from '@shopify/polaris-icons';
+import priceWithCurrency from '../../utility/currenctUtility.js';
 
 export function ProductMailHistoryTab({ selectedDayIndex }) {
     const app = useAppBridge();
@@ -64,10 +65,6 @@ export function ProductMailHistoryTab({ selectedDayIndex }) {
         }
 
         setPageIndex(index);
-    };
-
-    const priceWithCurrency = (price, currency) => {
-        return new Intl.NumberFormat('de-DE', { style: 'currency', currency: currency }).format(Number(price));
     };
 
     const rowMarkup =

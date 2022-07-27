@@ -9,6 +9,7 @@ import { userLoggedInFetch } from '../App.jsx';
 import { ContactUs } from './ContactUs.jsx';
 import { Profile } from './Profile';
 import { Dashboard } from './dashboard/Dashboard.jsx';
+import { Compare } from './compare/Compare.jsx';
 
 export function HomePage() {
     const app = useAppBridge();
@@ -103,7 +104,7 @@ export function HomePage() {
                 title="Product Compare"
                 items={[
                     {
-                        onClick: () => handleFrameIndex(0),
+                        onClick: () => handleFrameIndex(6),
                         label: 'Compare',
                         icon: ExchangeMajor,
                     },
@@ -135,6 +136,7 @@ export function HomePage() {
         pageList.push(<Email />);
         pageList.push(<Alarm />);
         pageList.push(<Dashboard />);
+        pageList.push(<Compare />);
 
         return pageList[index];
     };

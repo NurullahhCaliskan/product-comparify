@@ -2,6 +2,7 @@ import { Shopify } from '@shopify/shopify-api';
 import { getBrowserName } from '../utility/helper.js';
 import logHistoryService from '../service/logHistoryService.js';
 import LogHistoryService from '../service/logHistoryService.js';
+import sizeof from 'object-sizeof';
 
 const TEST_GRAPHQL_QUERY = `
 {
@@ -10,12 +11,19 @@ const TEST_GRAPHQL_QUERY = `
   }
 }`;
 
+const resDotSendInterceptor = (res, send) => (content) => {
+    res.contentBody = content;
+    res.send = send;
+    res.send(content);
+};
+
 export default function verifyRequest(app, { returnHeader = true } = {}) {
     return async (req, res, next) => {
         let logHistoryService = new LogHistoryService();
         const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
         const requestStart = Date.now();
 
+        res.send = resDotSendInterceptor(res, res.send);
         res.on('finish', () => {
             const { rawHeaders, httpVersion, method, socket, url } = req;
             const { remoteAddress, remoteFamily } = socket;
@@ -32,6 +40,8 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
                 httpVersion,
                 remoteAddress,
                 remoteFamily,
+                size: sizeof(res.contentBody),
+                status_code: res.statusCode,
             };
 
             logHistoryService.saveLogHistory(logJson);

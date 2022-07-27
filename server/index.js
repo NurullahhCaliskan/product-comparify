@@ -24,6 +24,8 @@ import SearchService from './service/searchService.js';
 import DashboardService from './service/dashboardService.js';
 import ProductMailHistoryService from './service/productMailHistoryService.js';
 import StoreService from './service/storeService.js';
+import MerchantsProductsService from './service/merchantsProducts.js';
+import ProductHistoryService from './service/ProductHistoryService.js';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -145,6 +147,37 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         res.status(200).send(JSON.stringify(response));
     });
 
+    app.post('/merchant-products', verifyRequest(app), async (req, res) => {
+        collections.productHistoryModel.createIndex({ vendor: 1 }, { collation: { locale: 'en', strength: 2 } });
+
+        let merchantsProductsService = new MerchantsProductsService();
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+            const client = new Shopify.Clients.Graphql(session.shop, session.accessToken);
+
+            let products = await merchantsProductsService.getMerchantProduct(client, req.body);
+
+            return res.status(200).send(JSON.stringify(products));
+        } catch (e) {
+            console.log(e);
+            return res.status(401).send();
+        }
+    });
+
+    app.post('/compare-product', verifyRequest(app), async (req, res) => {
+        let productSearch = new ProductHistoryService();
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+
+            let products = await productSearch.getSameProductsByProduct(session, req.body);
+
+            return res.status(200).send(JSON.stringify(products));
+        } catch (e) {
+            console.log(e);
+            return res.status(401).send();
+        }
+    });
+
     app.get('/send-test-mail', verifyRequest(app), async (req, res) => {
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
@@ -179,13 +212,15 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
     app.post('/search', verifyRequest(app), async (req, res) => {
         let searchMapper = new SearchMapper();
+        let searchService = new SearchService();
         console.log('search');
         try {
-            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+            let searchModel = searchMapper.setSearchMapper(req.body.storeId, req);
 
-            let searchModel = searchMapper.setSearchMapper(session.onlineAccessInfo.associated_user.storeId, req);
-
+            let result = await searchService.getSearch(searchModel);
             console.log(searchModel);
+
+            return res.status(200).send(JSON.stringify(result));
         } catch (e) {
             console.log(e);
         }
@@ -229,7 +264,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
 
-    app.post('/product-mail-history-info', async (req, res) => {
+    app.post('/product-mail-history-info', verifyRequest(app), async (req, res) => {
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
@@ -247,33 +282,44 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     });
 
     app.post('/query/test', async (req, res) => {
-        console.log('query/test');
-        let date = new Date();
+        try {
+            let body = req.body;
 
-        let body = req.body;
+            let handle = body.handle;
+            let vendor = body.vendor;
+            let productType = body.productType;
+            let tags = body.tags;
 
-        let dateType = body.date_type;
+            console.log(handle);
+            console.log(vendor);
+            console.log(productType);
+            let result = await collections.productHistoryModel
+                ?.aggregate([
+                    {
+                        $lookup: {
+                            from: 'store-websites-relation',
+                            localField: 'website',
+                            foreignField: 'website',
+                            as: 'storeWebsiteRelation',
+                        },
+                    },
+                    {
+                        $match: {
+                            $or: [{ handle: handle }, { vendor: vendor }, { productType: productType }, { tags: { $in: tags } }],
+                            'storeWebsiteRelation.storeId': 64695009492,
+                        },
+                    },
+                    { $project: { id: 1, title: 1, handle: 1, published_at: 1, created_at: 1, updated_at: 1, vendor: 1, product_type: 1, tags: 1, variants: 1, images: 1, options: 1, website: 1, collection: 1, url: 1 } },
+                ])
+                .toArray();
 
-        let json = [
-            {
-                $match: { $and: [{ storeId: 64695009492 }, { id: 84057161940 }] },
-            },
+            console.log(JSON.stringify(result[0]));
+        } catch (e) {
+            console.log(e);
+            return res.status(401).send();
+        }
 
-            {
-                $lookup: {
-                    from: 'store',
-                    localField: 'storeId',
-                    foreignField: 'id',
-                    as: 'storeInfo',
-                },
-            },
-
-            { $project: { storeId: 1, first_name: 1, last_name: 1, 'storeInfo.address1': 1, 'storeInfo.country_name': 1, 'storeInfo.selectedMail': 1 } },
-        ];
-
-        let response = await collections.storeUserModel?.aggregate(json).toArray();
-
-        return res.send(JSON.stringify(response));
+        return res.status(200).send();
     });
 
     app.post('/user-crawl-url', verifyRequest(app), async (req, res) => {
@@ -399,6 +445,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             const test_session = await Shopify.Utils.loadCurrentSession(req, res);
             let products = await Product.all({
                 session: test_session,
+                fields: 'id,images,title',
             });
 
             console.log(products);

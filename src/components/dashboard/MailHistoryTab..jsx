@@ -2,6 +2,7 @@ import { useAppBridge } from '@shopify/app-bridge-react';
 import { userLoggedInFetch } from '../../App.jsx';
 import { useEffect, useState } from 'react';
 import { Card, EmptySearchResult, IndexTable, Pagination, Tabs, TextStyle } from '@shopify/polaris';
+import { humanReadableTime } from '../../utility/dateUtility.js';
 
 export function MailHistoryTab({ selectedDayIndex }) {
     const app = useAppBridge();
@@ -63,12 +64,6 @@ export function MailHistoryTab({ selectedDayIndex }) {
         }
 
         setPageIndex(index);
-    };
-
-    const humanReadableTime = (time) => {
-        let date = new Date(time);
-
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
     };
 
     const rowMarkup =
