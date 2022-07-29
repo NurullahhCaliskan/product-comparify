@@ -111,17 +111,6 @@ export function HomePage() {
                 ]}
                 separator
             />
-            <Navigation.Section
-                title="General Search"
-                items={[
-                    {
-                        onClick: () => handleFrameIndex(0),
-                        label: 'General Keyword',
-                        icon: SearchMinor,
-                    },
-                ]}
-                separator
-            />
         </Navigation>
     );
 

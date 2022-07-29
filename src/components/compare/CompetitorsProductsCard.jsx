@@ -73,10 +73,8 @@ export function CompetitorsProductsCard(prop) {
         plural: "competitor's products",
     };
 
-    const filters = [];
-
     const filterControl = (
-        <Filters queryValue={queryValue} filters={filters} onQueryChange={setQueryValue} onQueryClear={handleQueryValueRemove} onClearAll={handleClearAll}>
+        <Filters queryValue={queryValue} filters={[]} onQueryChange={setQueryValue} onQueryClear={handleQueryValueRemove} onClearAll={handleClearAll}>
             <div style={{ paddingLeft: '8px' }}>
                 <Button onClick={() => setPage(0)}>Search</Button>
             </div>

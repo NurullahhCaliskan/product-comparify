@@ -1,10 +1,11 @@
-import { Avatar, Button, Card, Filters, ResourceItem, ResourceList, TextStyle } from '@shopify/polaris';
+import { Avatar, Button, Card, Filters, Pagination, ResourceItem, ResourceList, TextStyle } from '@shopify/polaris';
 import { useCallback, useEffect, useState } from 'react';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { userLoggedInFetch } from '../../App.jsx';
 import _ from 'lodash';
 import priceWithCurrency from '../../utility/currenctUtility.js';
 
+let pageInfo = { endCursor: null, hasNextPage: false, hasPreviousPage: false, startCursor: null };
 export function MerchantProductCard(prop) {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
@@ -19,6 +20,9 @@ export function MerchantProductCard(prop) {
         handleQueryValueRemove();
     }, [handleQueryValueRemove]);
 
+    const [hasNext, setHasNext] = useState(false);
+    const [hasBefore, setHasBefore] = useState(false);
+
     const getMerchantsProducts = async () => {
         try {
             setLoadingUrl(true);
@@ -27,10 +31,16 @@ export function MerchantProductCard(prop) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     search: queryValue,
+                    end_cursor: pageInfo.endCursor,
+                    start_cursor: pageInfo.startCursor,
                 }),
             }).then((res) => res.json());
 
             setItems(productListResponse.body.data.products.edges);
+            pageInfo = Object.assign({}, productListResponse.body.data.products.pageInfo);
+
+            setHasNext(pageInfo.hasNextPage);
+            setHasBefore(pageInfo.hasPreviousPage);
         } catch (e) {
             setItems([]);
         }
@@ -46,12 +56,28 @@ export function MerchantProductCard(prop) {
         plural: 'products',
     };
 
-    const filters = [];
+    const setPage = async (direction) => {
+        //left
+        if (direction === -1) {
+            pageInfo.endCursor = null;
+        }
+
+        //right
+        if (direction === 1) {
+            pageInfo.startCursor = null;
+        }
+
+        if (direction === 0) {
+            pageInfo.startCursor = null;
+            pageInfo.endCursor = null;
+        }
+        await getMerchantsProducts();
+    };
 
     const filterControl = (
-        <Filters queryValue={queryValue} filters={filters} onQueryChange={setQueryValue} onQueryClear={handleQueryValueRemove} onClearAll={handleClearAll}>
+        <Filters queryValue={queryValue} filters={[]} onQueryChange={setQueryValue} onQueryClear={handleQueryValueRemove} onClearAll={handleClearAll}>
             <div style={{ paddingLeft: '8px' }}>
-                <Button onClick={() => getMerchantsProducts()}>Search</Button>
+                <Button onClick={() => setPage(0)}>Search</Button>
             </div>
         </Filters>
     );
@@ -59,6 +85,10 @@ export function MerchantProductCard(prop) {
     return (
         <Card>
             <ResourceList loading={loadingUrl} resourceName={resourceName} items={items} renderItem={renderItem} filterControl={filterControl} />
+
+            <div style={{ marginLeft: '45%' }}>
+                <Pagination nextTooltip={'Next'} previousTooltip={'Previous'} onPrevious={() => setPage(-1)} onNext={() => setPage(+1)} hasPrevious={hasBefore} hasNext={hasNext} />
+            </div>
         </Card>
     );
 

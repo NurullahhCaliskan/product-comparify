@@ -4,12 +4,29 @@ export default class MerchantsProductsService {
     async getMerchantProduct(client, body) {
         let innerList = [];
 
-        let innerFirst = 'first:10';
-        let innerCursor = null;
+        let innerFirst = null;
+
+        let beforeCursor = null;
+        let afterCursor = null;
+
+        if (body.start_cursor || body.end_cursor) {
+            if (body.start_cursor) {
+                innerFirst = 'last:10';
+                beforeCursor = 'before:"' + body.start_cursor + '"';
+            }
+            if (body.end_cursor) {
+                innerFirst = 'first:10';
+                afterCursor = 'after:"' + body.end_cursor + '"';
+            }
+        } else {
+            innerFirst = 'first:10';
+        }
+
         let innerQuery = queryBuilder(body);
 
         innerList.push(innerFirst);
-        innerList.push(innerCursor);
+        innerList.push(beforeCursor);
+        innerList.push(afterCursor);
         innerList.push(innerQuery);
 
         let queryFilterAsString = innerList.filter((item) => item !== null).join(', ');
