@@ -26,6 +26,7 @@ import ProductMailHistoryService from './service/productMailHistoryService.js';
 import StoreService from './service/storeService.js';
 import MerchantsProductsService from './service/merchantsProducts.js';
 import ProductHistoryService from './service/ProductHistoryService.js';
+import setDbActive from './static/db.js';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -59,8 +60,10 @@ async function loadDb() {
 
         console.log('success load db5');
         console.log(process.env.HOST.replace(/https:\/\//, ''));
+        setDbActive(true);
     } catch (e) {
         console.log(e);
+        setDbActive(false);
     }
 }
 

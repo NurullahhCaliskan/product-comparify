@@ -35984,7 +35984,7 @@ function print() { __p += __j.call(arguments, '') }
         return $(tJ, { navigation: k, showMobileNavigation: h, onNavigationDismiss: C, skipToContentTarget: t.current, children: [O, j] });
     }
     function Xee() {
-        return y(fz, { i18n: PZ, children: y(Gn.Provider, { config: { apiKey: '05ad0723db8739dcf4541842cf424e3e', host: new URL(location).searchParams.get('host'), forceRedirect: !0 }, children: y(Kee, { children: y(Yee, {}) }) }) });
+        return y(fz, { i18n: PZ, children: y(Gn.Provider, { config: { apiKey: 'e7ff36fde2cac23c8cf5a8a81d0e1434', host: new URL(location).searchParams.get('host'), forceRedirect: !0 }, children: y(Kee, { children: y(Yee, {}) }) }) });
     }
     function Kee({ children: e }) {
         const t = Gn.useAppBridge(),

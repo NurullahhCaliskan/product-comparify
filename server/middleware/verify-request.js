@@ -3,6 +3,7 @@ import { getBrowserName } from '../utility/helper.js';
 import logHistoryService from '../service/logHistoryService.js';
 import LogHistoryService from '../service/logHistoryService.js';
 import sizeof from 'object-sizeof';
+import { dbActive } from '../static/db.js';
 
 const TEST_GRAPHQL_QUERY = `
 {
@@ -24,6 +25,11 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
         const requestStart = Date.now();
 
         res.send = resDotSendInterceptor(res, res.send);
+
+        if (!dbActive) {
+            return res.status(503).send('Service Unavailable');
+        }
+
         res.on('finish', () => {
             const { rawHeaders, httpVersion, method, socket, url } = req;
             const { remoteAddress, remoteFamily } = socket;
