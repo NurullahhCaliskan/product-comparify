@@ -118,7 +118,14 @@ export default class UrlToScrapRepository {
                 },
             },
             { $unwind: '$websites' },
-
+            {
+                $lookup: {
+                    from: 'product-history-crawler-queue', // other table name
+                    localField: 'website', // name of users table field
+                    foreignField: 'website', // name of userinfo table field
+                    as: 'queueWebsites', // alias for userinfo table
+                },
+            },
             {
                 $match: {
                     $and: [{ storeId: storeId }],

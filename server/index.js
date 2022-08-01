@@ -231,7 +231,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
 
-    app.post('/search-test', async (req, res) => {
+    app.post('/search-test', verifyRequest(app), async (req, res) => {
         let searchMapper = new SearchMapper();
         let searchService = new SearchService();
         console.log('search');
@@ -249,7 +249,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
 
-    app.post('/dashboard-info', async (req, res) => {
+    app.post('/dashboard-info', verifyRequest(app), async (req, res) => {
         console.log('dashboard-info');
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
@@ -286,37 +286,41 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
     app.post('/query/test', async (req, res) => {
         try {
-            let body = req.body;
-
-            let handle = body.handle;
-            let vendor = body.vendor;
-            let productType = body.productType;
-            let tags = body.tags;
-
-            console.log(handle);
-            console.log(vendor);
-            console.log(productType);
-            let result = await collections.productHistoryModel
-                ?.aggregate([
-                    {
-                        $lookup: {
-                            from: 'store-websites-relation',
-                            localField: 'website',
-                            foreignField: 'website',
-                            as: 'storeWebsiteRelation',
-                        },
+            let result = [];
+            let aggregateJson = [
+                {
+                    $lookup: {
+                        from: 'websites', // other table name
+                        localField: 'website', // name of users table field
+                        foreignField: 'url', // name of userinfo table field
+                        as: 'websites', // alias for userinfo table
                     },
-                    {
-                        $match: {
-                            $or: [{ handle: handle }, { vendor: vendor }, { productType: productType }, { tags: { $in: tags } }],
-                            'storeWebsiteRelation.storeId': 64695009492,
-                        },
+                },
+                { $unwind: '$websites' },
+                {
+                    $lookup: {
+                        from: 'product-history-crawler-queue', // other table name
+                        localField: 'website', // name of users table field
+                        foreignField: 'website', // name of userinfo table field
+                        as: 'queueWebsites', // alias for userinfo table
                     },
-                    { $project: { id: 1, title: 1, handle: 1, published_at: 1, created_at: 1, updated_at: 1, vendor: 1, product_type: 1, tags: 1, variants: 1, images: 1, options: 1, website: 1, collection: 1, url: 1 } },
-                ])
-                .toArray();
+                },
+                {
+                    $match: {
+                        $and: [{ storeId: 64695009492 }],
+                    },
+                },
+            ];
 
-            console.log(JSON.stringify(result[0]));
+            result = await collections.storeWebsitesRelationModel.aggregate(aggregateJson).toArray();
+
+            const newArrayOfObj = result.map(({ _id: id, ...rest }) => ({
+                id,
+                ...rest,
+            }));
+
+            console.log(JSON.stringify(newArrayOfObj));
+            return res.status(200).send(newArrayOfObj);
         } catch (e) {
             console.log(e);
             return res.status(401).send();

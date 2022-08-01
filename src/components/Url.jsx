@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Avatar, Button, Card, EmptySearchResult, EmptyState, Page, Pagination, ResourceList, Stack, TextField, TextStyle, Toast } from '@shopify/polaris';
+import { Avatar, Button, Card, EmptySearchResult, EmptyState, Page, Pagination, ResourceList, Stack, TextField, TextStyle, Toast, Badge } from '@shopify/polaris';
 import { DeleteMinor } from '@shopify/polaris-icons';
 import { userLoggedInFetch } from '../App';
 import { useAppBridge } from '@shopify/app-bridge-react';
@@ -202,13 +202,22 @@ export function Url() {
                                     items={urlList && urlList.length > 0 ? urlList.slice(10 * pageIndex, 10 * pageIndex + 10) : []}
                                     loading={loadingUrl}
                                     renderItem={(item) => {
-                                        const { id, url, website } = item;
+                                        const { id, url, website, queueWebsites } = item;
                                         const media = <Avatar customer size="medium" name={website} source={item.websites.faviconUrl ? item.websites.faviconUrl : 'https://polaris.shopify.com/icons/DomainsMajor.svg'} />;
+
+                                        const isLoading = queueWebsites && queueWebsites.length > 0;
                                         return (
                                             <ResourceList.Item id={id} url={url} media={media} persistActions>
                                                 <h3>
                                                     <TextStyle variation="strong">{website}</TextStyle>
                                                 </h3>
+                                                {isLoading ? (
+                                                    <Badge progress="partiallyComplete" status="attention">
+                                                        Loading
+                                                    </Badge>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </ResourceList.Item>
                                         );
                                     }}
