@@ -31,26 +31,28 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
         }
 
         res.on('finish', () => {
-            const { rawHeaders, httpVersion, method, socket, url } = req;
-            const { remoteAddress, remoteFamily } = socket;
+            try {
+                const { rawHeaders, httpVersion, method, socket, url } = req;
+                const { remoteAddress, remoteFamily } = socket;
 
-            let logJson = {
-                storeId: session.onlineAccessInfo.associated_user.storeId,
-                userId: session.onlineAccessInfo.associated_user.id,
-                timestamp: Date.now(),
-                processingTime: Date.now() - requestStart,
-                browser: getBrowserName(req.headers['user-agent']),
-                start_date: new Date(),
-                method,
-                url,
-                httpVersion,
-                remoteAddress,
-                remoteFamily,
-                size: sizeof(res.contentBody),
-                status_code: res.statusCode,
-            };
+                let logJson = {
+                    storeId: session.onlineAccessInfo.associated_user.storeId,
+                    userId: session.onlineAccessInfo.associated_user.id,
+                    timestamp: Date.now(),
+                    processingTime: Date.now() - requestStart,
+                    browser: getBrowserName(req.headers['user-agent']),
+                    start_date: new Date(),
+                    method,
+                    url,
+                    httpVersion,
+                    remoteAddress,
+                    remoteFamily,
+                    size: sizeof(res.contentBody),
+                    status_code: res.statusCode,
+                };
 
-            logHistoryService.saveLogHistory(logJson);
+                logHistoryService.saveLogHistory(logJson);
+            } catch (e) {}
         });
 
         let shop = req.query.shop;
