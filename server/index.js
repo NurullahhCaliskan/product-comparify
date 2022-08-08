@@ -36,37 +36,6 @@ const TOP_LEVEL_OAUTH_COOKIE = 'shopify_top_level_oauth';
 const PORT = parseInt(process.env.PORT || '8081', 10);
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITE_TEST_BUILD;
 
-async function loadDb() {
-    try {
-        let client = new mongoDB.MongoClient(process.env.DBHOST);
-
-        console.log(process.env.BACKENDURL);
-        console.log(process.env.SHOPIFY_API_KEY);
-        console.log(process.env.NODE_ENV);
-        await client.connect();
-
-        let db = client.db(process.env.DBNAME);
-        collections.storeWebsitesRelationModel = db.collection('store-websites-relation');
-        collections.websitesModel = db.collection('websites');
-        collections.productHistoryModel = db.collection('product-history');
-        collections.userSessionModel = db.collection('user-session');
-        collections.mailHistoryModel = db.collection('mail-history');
-        collections.contactSupportModel = db.collection('contact-support');
-        collections.productHistoryCrawlerQueueModel = db.collection('product-history-crawler-queue');
-        collections.storeModel = db.collection('store');
-        collections.storeUserModel = db.collection('store-user');
-        collections.productMailHistoryModel = db.collection('product-mail-history');
-        collections.logHistoryModel = db.collection('log-history');
-
-        console.log('success load db5');
-        console.log(process.env.HOST.replace(/https:\/\//, ''));
-        setDbActive(true);
-    } catch (e) {
-        console.log(e);
-        setDbActive(false);
-    }
-}
-
 Shopify.Context.initialize({
     API_KEY: process.env.SHOPIFY_API_KEY,
     API_SECRET_KEY: process.env.SHOPIFY_API_SECRET,
@@ -91,8 +60,6 @@ Shopify.Webhooks.Registry.addHandler('APP_UNINSTALLED', {
 // export for test use only
 export async function createServer(root = process.cwd(), isProd = process.env.NODE_ENV === 'production') {
     const app = express();
-
-    await loadDb();
 
     app.set('top-level-oauth-cookie', TOP_LEVEL_OAUTH_COOKIE);
     app.set('active-shopify-shops', ACTIVE_SHOPIFY_SHOPS);
