@@ -131,6 +131,7 @@ export default class UrlToScrapRepository {
                     $and: [{ storeId: storeId }],
                 },
             },
+            { $project: { id: 1, storeId: 1, website: 1, alarm: 1, value: 1, 'websites.faviconUrl': 1, queueWebsites: 1 } },
         ];
 
         await collections.storeWebsitesRelationModel

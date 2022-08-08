@@ -286,41 +286,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
     app.post('/query/test', async (req, res) => {
         try {
-            let result = [];
-            let aggregateJson = [
-                {
-                    $lookup: {
-                        from: 'websites', // other table name
-                        localField: 'website', // name of users table field
-                        foreignField: 'url', // name of userinfo table field
-                        as: 'websites', // alias for userinfo table
-                    },
-                },
-                { $unwind: '$websites' },
-                {
-                    $lookup: {
-                        from: 'product-history-crawler-queue', // other table name
-                        localField: 'website', // name of users table field
-                        foreignField: 'website', // name of userinfo table field
-                        as: 'queueWebsites', // alias for userinfo table
-                    },
-                },
-                {
-                    $match: {
-                        $and: [{ storeId: 64695009492 }],
-                    },
-                },
-            ];
-
-            result = await collections.storeWebsitesRelationModel.aggregate(aggregateJson).toArray();
-
-            const newArrayOfObj = result.map(({ _id: id, ...rest }) => ({
-                id,
-                ...rest,
-            }));
-
-            console.log(JSON.stringify(newArrayOfObj));
-            return res.status(200).send(newArrayOfObj);
+            return res.status(200).send('asdsa');
         } catch (e) {
             console.log(e);
             return res.status(401).send();
