@@ -27,3 +27,9 @@ export function getTomorrowMidnight() {
 
     return date;
 }
+
+export function formatDate() {
+    let d = new Date();
+
+    return [d.getFullYear(), d.getMonth(), d.getDay()].join('-');
+}

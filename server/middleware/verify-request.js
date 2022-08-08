@@ -4,6 +4,8 @@ import logHistoryService from '../service/logHistoryService.js';
 import LogHistoryService from '../service/logHistoryService.js';
 import sizeof from 'object-sizeof';
 import { dbActive } from '../static/db.js';
+import { logger } from '../utility/logUtility.js';
+import { __filename } from '../static/paths.js';
 
 const TEST_GRAPHQL_QUERY = `
 {
@@ -52,7 +54,9 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
                 };
 
                 logHistoryService.saveLogHistory(logJson);
-            } catch (e) {}
+            } catch (e) {
+                logger.error(__filename + e);
+            }
         });
 
         let shop = req.query.shop;
