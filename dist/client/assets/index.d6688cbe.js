@@ -29985,7 +29985,7 @@ function CY() {
     return h(fj, {
         i18n: Cq,
         children: h(qn.Provider, {
-            config: { apiKey: 'e7ff36fde2cac23c8cf5a8a81d0e1434', host: new URL(location).searchParams.get('host'), forceRedirect: !0 },
+            config: { apiKey: '05ad0723db8739dcf4541842cf424e3e', host: new URL(location).searchParams.get('host'), forceRedirect: !0 },
             children: h(Yq, { children: j(Xq, { children: [h(rg, { path: '/', element: h(SY, {}) }), h(rg, { path: 'expenses', element: h(EY, {}) })] }) }),
         }),
     });
