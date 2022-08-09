@@ -11,6 +11,7 @@ export function CompetitorsProductsCard(prop) {
     const [queryValue, setQueryValue] = useState(null);
     const [items, setItems] = useState([]);
     const [itemsCount, setItemsCount] = useState(0);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     let itemsCountWithoutState = 0;
     let pageIndexWithoutState = 0;
@@ -104,17 +105,30 @@ export function CompetitorsProductsCard(prop) {
     );
 
     function renderItem(item) {
+        let selectedId = null;
+        if (selectedProduct) {
+            selectedId = selectedProduct.id;
+        }
         const { id, title, images, website } = item;
 
         const media = <Avatar customer size="medium" name={id} source={_.get(images, '[0]') ? images[0].src : 'https://polaris.shopify.com/icons/DomainsMajor.svg'} />;
 
         return (
-            <ResourceItem id={id} media={media} onClick={() => prop.selectProduct(item)}>
-                <h3>
-                    <TextStyle variation="strong">{title}</TextStyle>
-                </h3>
-                <div>{website} </div>
-            </ResourceItem>
+            <div style={selectedId === id ? { borderStyle: 'solid' } : {}}>
+                <ResourceItem
+                    id={id}
+                    media={media}
+                    onClick={() => {
+                        prop.selectProduct(item);
+                        setSelectedProduct(item);
+                    }}
+                >
+                    <h3>
+                        <TextStyle variation="strong">{title}</TextStyle>
+                    </h3>
+                    <div>{website} </div>
+                </ResourceItem>
+            </div>
         );
     }
 }

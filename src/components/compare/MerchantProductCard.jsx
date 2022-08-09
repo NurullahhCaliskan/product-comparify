@@ -12,6 +12,7 @@ export function MerchantProductCard(prop) {
 
     const [queryValue, setQueryValue] = useState(null);
     const [items, setItems] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const [loadingUrl, setLoadingUrl] = useState(false);
 
@@ -93,17 +94,30 @@ export function MerchantProductCard(prop) {
     );
 
     function renderItem(item) {
+        let selectedId = null;
+        if (selectedProduct) {
+            selectedId = selectedProduct.node.id;
+        }
         const { id, title, handle, priceRangeV2, images } = item.node;
 
         const media = <Avatar customer size="medium" name={id} source={_.get(images, 'edges[0].node') ? images.edges[0].node.url : 'https://polaris.shopify.com/icons/DomainsMajor.svg'} />;
 
         return (
-            <ResourceItem id={id} media={media} onClick={() => prop.selectProduct(item)}>
-                <h3>
-                    <TextStyle variation="strong">{title}</TextStyle>
-                </h3>
-                <div>{priceWithCurrency(priceRangeV2.minVariantPrice.amount, priceRangeV2.minVariantPrice.currencyCode)} </div>
-            </ResourceItem>
+            <div style={selectedId === id ? { borderStyle: 'solid' } : {}}>
+                <ResourceItem
+                    id={id}
+                    media={media}
+                    onClick={() => {
+                        prop.selectProduct(item);
+                        setSelectedProduct(item);
+                    }}
+                >
+                    <h3>
+                        <TextStyle variation="strong">{title}</TextStyle>
+                    </h3>
+                    <div>{priceWithCurrency(priceRangeV2.minVariantPrice.amount, priceRangeV2.minVariantPrice.currencyCode)} </div>
+                </ResourceItem>
+            </div>
         );
     }
 }
