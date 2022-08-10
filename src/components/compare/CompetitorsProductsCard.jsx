@@ -91,7 +91,7 @@ export function CompetitorsProductsCard(prop) {
         if (!query) return;
 
         filterTimeout = setTimeout(async () => {
-            await getSameProducts();
+            await setPage(0);
         }, 400);
     };
 

@@ -179,7 +179,7 @@ export function AddStore() {
                         </Card>
                     ) : (
                         <div>
-                            <Card sectioned title="Store AddStore">
+                            <Card sectioned title="Add New Store">
                                 <Stack>
                                     <TextField placeholder={'www.shopify.com'} value={urlFieldValue} onChange={handleUrlFieldChange} />
 
