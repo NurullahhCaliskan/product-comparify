@@ -1,4 +1,5 @@
 import { collections } from '../database.config.js';
+import { logger } from '../utility/logUtility.js';
 
 export default class ProductHistoryRepository {
     async getSameProductsByProduct(storeId, body, requestBody) {

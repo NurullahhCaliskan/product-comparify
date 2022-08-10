@@ -25,8 +25,9 @@ export function Compare() {
     };
 
     return (
-        <Page breadcrumbs={[{ content: 'Products', url: '/products' }]} compactTitle title="Compare" subtitle="To use the comparison structure, first select a product available in your store. Next, select the product you want to compare and click the 'compare' button.">
+        <Page compactTitle title="Compare" subtitle="To use the comparison structure, first select a product available in your store. Next, select the product you want to compare and click the 'Search' button.">
             <Subheading>Comparisons can be made with only one product.</Subheading>
+            <br />
             <Layout>
                 <Layout.Section secondary>
                     <MerchantProductCard selectProduct={(item) => selectMerchantProduct(item)} />

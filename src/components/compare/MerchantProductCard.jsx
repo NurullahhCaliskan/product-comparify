@@ -1,11 +1,13 @@
 import { Avatar, Button, Card, Filters, Pagination, ResourceItem, ResourceList, TextStyle } from '@shopify/polaris';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { userLoggedInFetch } from '../../App.jsx';
 import _ from 'lodash';
 import priceWithCurrency from '../../utility/currenctUtility.js';
 
 let pageInfo = { endCursor: null, hasNextPage: false, hasPreviousPage: false, startCursor: null };
+let clickedToRemoveFilter = false;
+let filterTimeout;
 export function MerchantProductCard(prop) {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
@@ -16,10 +18,10 @@ export function MerchantProductCard(prop) {
 
     const [loadingUrl, setLoadingUrl] = useState(false);
 
-    const handleQueryValueRemove = useCallback(() => setQueryValue(null), []);
-    const handleClearAll = useCallback(() => {
-        handleQueryValueRemove();
-    }, [handleQueryValueRemove]);
+    const handleQueryValueRemove = () => {
+        clickedToRemoveFilter = true;
+        setQueryValue(null);
+    };
 
     const [hasNext, setHasNext] = useState(false);
     const [hasBefore, setHasBefore] = useState(false);
@@ -49,8 +51,29 @@ export function MerchantProductCard(prop) {
     };
 
     useEffect(async () => {
+        pageInfo = Object.assign({}, { endCursor: null, hasNextPage: false, hasPreviousPage: false, startCursor: null });
         await getMerchantsProducts();
     }, []);
+
+    useEffect(async () => {
+        pageInfo = Object.assign({}, { endCursor: null, hasNextPage: false, hasPreviousPage: false, startCursor: null });
+        if (clickedToRemoveFilter) {
+            await getMerchantsProducts();
+        }
+        clickedToRemoveFilter = false;
+
+        doFilter(queryValue);
+    }, [queryValue]);
+
+    const doFilter = (query) => {
+        setQueryValue(query);
+        clearTimeout(filterTimeout);
+        if (!query) return;
+
+        filterTimeout = setTimeout(async () => {
+            await getMerchantsProducts();
+        }, 400);
+    };
 
     const resourceName = {
         singular: 'product',
@@ -76,7 +99,7 @@ export function MerchantProductCard(prop) {
     };
 
     const filterControl = (
-        <Filters queryValue={queryValue} filters={[]} onQueryChange={setQueryValue} onQueryClear={handleQueryValueRemove} onClearAll={handleClearAll}>
+        <Filters queryValue={queryValue} filters={[]} onQueryChange={setQueryValue} onQueryClear={handleQueryValueRemove}>
             <div style={{ paddingLeft: '8px' }}>
                 <Button onClick={() => setPage(0)}>Search</Button>
             </div>

@@ -68,7 +68,7 @@ export default class WebsiteService {
     }
 
     /***
-     * get Favicon Url By Website Name From Web
+     * get Favicon AddStore By Website Name From Web
      * @param url
      * @return {Promise<null>}
      */

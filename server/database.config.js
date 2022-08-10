@@ -3,8 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
-console.log('process.env.DBHOST');
-console.log(process.env.DBHOST);
 const client = new mongoDB.MongoClient(process.env.DBHOST);
 
 client.connect().then((r) => r);

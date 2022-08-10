@@ -4,6 +4,8 @@ import { useAppBridge } from '@shopify/app-bridge-react';
 import { userLoggedInFetch } from '../../App.jsx';
 import _ from 'lodash';
 
+let clickedToRemoveFilter = false;
+let filterTimeout;
 export function CompetitorsProductsCard(prop) {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
@@ -18,10 +20,10 @@ export function CompetitorsProductsCard(prop) {
 
     const [loadingUrl, setLoadingUrl] = useState(false);
 
-    const handleQueryValueRemove = useCallback(() => setQueryValue(null), []);
-    const handleClearAll = useCallback(() => {
-        handleQueryValueRemove();
-    }, [handleQueryValueRemove]);
+    const handleQueryValueRemove = () => {
+        clickedToRemoveFilter = true;
+        setQueryValue(null);
+    };
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageMaxIndex, setPageMaxIndex] = useState(0);
@@ -53,6 +55,15 @@ export function CompetitorsProductsCard(prop) {
     };
 
     useEffect(async () => {
+        if (clickedToRemoveFilter) {
+            await setPage(0);
+        }
+        clickedToRemoveFilter = false;
+
+        doFilter(queryValue);
+    }, [queryValue]);
+
+    useEffect(async () => {
         await setPage(0);
     }, [prop.merchantProduct]);
 
@@ -74,8 +85,18 @@ export function CompetitorsProductsCard(prop) {
         plural: "competitor's products",
     };
 
+    const doFilter = (query) => {
+        setQueryValue(query);
+        clearTimeout(filterTimeout);
+        if (!query) return;
+
+        filterTimeout = setTimeout(async () => {
+            await getSameProducts();
+        }, 400);
+    };
+
     const filterControl = (
-        <Filters queryValue={queryValue} filters={[]} onQueryChange={setQueryValue} onQueryClear={handleQueryValueRemove} onClearAll={handleClearAll}>
+        <Filters queryValue={queryValue} filters={[]} onQueryChange={setQueryValue} onQueryClear={handleQueryValueRemove}>
             <div style={{ paddingLeft: '8px' }}>
                 <Button onClick={() => setPage(0)}>Search</Button>
             </div>

@@ -6,7 +6,6 @@ import { AppProvider as PolarisProvider } from '@shopify/polaris';
 import translations from '@shopify/polaris/locales/en.json';
 import '@shopify/polaris/build/esm/styles.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
 import { HomePage } from './components/HomePage';
 import { ServiceUnavailable } from './components/serviceUnavailable/ServiceUnavailable.jsx';
 
@@ -37,15 +36,15 @@ export function userLoggedInFetch(app) {
     return async (uri, options) => {
         const response = await fetchFunction(uri, options);
         console.log(response.status);
-        if (response.status === 500) {
-            const authUrlHeader = response.headers.get('X-Shopify-API-Request-Failure-Reauthorize-Url');
+        if (response.status === 503) {
+            const authUrlHeader = response.headers.get('X-Shopify-API-Request-Failure-Reauthorize-AddStore');
 
             const redirect = Redirect.create(app);
             redirect.dispatch(Redirect.Action.APP, authUrlHeader || `/expenses`);
             return null;
         }
         if (response.headers.get('X-Shopify-API-Request-Failure-Reauthorize') === '1') {
-            const authUrlHeader = response.headers.get('X-Shopify-API-Request-Failure-Reauthorize-Url');
+            const authUrlHeader = response.headers.get('X-Shopify-API-Request-Failure-Reauthorize-AddStore');
 
             const redirect = Redirect.create(app);
             redirect.dispatch(Redirect.Action.APP, authUrlHeader || `/auth`);

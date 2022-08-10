@@ -107,7 +107,7 @@ export function Dashboard() {
                                                 <h3>
                                                     <TextStyle variation="strong"># of Average Price Change %</TextStyle>
                                                 </h3>
-                                                <div>{average_price_change_as_rate}</div>
+                                                <div>{average_price_change_as_rate + ' %'}</div>
                                             </ResourceItem>
                                         );
                                     }}
@@ -126,7 +126,7 @@ export function Dashboard() {
                                                 <h3>
                                                     <TextStyle variation="strong"># of Average Price Change $</TextStyle>
                                                 </h3>
-                                                <div>{average_price_change_as_price}</div>
+                                                <div>{average_price_change_as_price + ' $'}</div>
                                             </ResourceItem>
                                         );
                                     }}
@@ -169,7 +169,7 @@ export function Dashboard() {
                                                 <h3>
                                                     <TextStyle variation="strong">Maximum Changing %</TextStyle>
                                                 </h3>
-                                                <div>{max_price_change_as_rate}</div>
+                                                <div>{max_price_change_as_rate + ' %'}</div>
                                             </ResourceItem>
                                         );
                                     }}

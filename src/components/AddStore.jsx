@@ -6,7 +6,7 @@ import { useAppBridge } from '@shopify/app-bridge-react';
 import { Loading } from '../helper/Loading.jsx';
 import addStore from '../assets/addstore.svg';
 
-export function Url() {
+export function AddStore() {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
 
@@ -42,10 +42,10 @@ export function Url() {
         setLoadingUrl(false);
 
         setSelectedItems([]);
-        setUrlFieldValue('www.shopify.com');
+        setUrlFieldValue('');
     };
 
-    const [urlFieldValue, setUrlFieldValue] = useState('www.shopify.com');
+    const [urlFieldValue, setUrlFieldValue] = useState('');
 
     const [urlList, setUrlList] = useState(getUrlList);
 
@@ -179,9 +179,9 @@ export function Url() {
                         </Card>
                     ) : (
                         <div>
-                            <Card sectioned title="Store Url">
+                            <Card sectioned title="Store AddStore">
                                 <Stack>
-                                    <TextField value={urlFieldValue} onChange={handleUrlFieldChange} />
+                                    <TextField placeholder={'www.shopify.com'} value={urlFieldValue} onChange={handleUrlFieldChange} />
 
                                     <Button onClick={() => addNewUrl()} loading={sendLoading}>
                                         {' '}

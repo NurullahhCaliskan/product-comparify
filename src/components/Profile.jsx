@@ -1,8 +1,9 @@
-import { Page, Layout, ResourceList, TextField, Card, TextStyle, ResourceItem, Avatar, List, Stack, Icon, Toast, FormLayout, Button } from '@shopify/polaris';
+import { Button, Card, FormLayout, Icon, Layout, Page, ResourceItem, ResourceList, TextField, TextStyle, Toast } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { useCallback, useState } from 'react';
 import { userLoggedInFetch } from '../App.jsx';
-import { StoreMajor, ProfileMinor, LocationMajor } from '@shopify/polaris-icons';
+import { LocationMajor, ProfileMinor, StoreMajor } from '@shopify/polaris-icons';
+import { Loading } from '../helper/Loading.jsx';
 
 export function Profile() {
     const app = useAppBridge();
@@ -10,6 +11,7 @@ export function Profile() {
 
     const [loading, setLoading] = useState(true);
     const [sendLoading, setSendLoading] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(true);
 
     //toast
     const [activeToast, setActiveToast] = useState(false);
@@ -32,6 +34,7 @@ export function Profile() {
         setResultSurname(response.last_name);
 
         setLoading(false);
+        setLoadingPage(false);
     };
 
     const upsertEmail = async () => {
@@ -60,118 +63,127 @@ export function Profile() {
     return (
         <Page fullWidth title="Profile">
             {toastMarkup}
-            <Layout>
-                <Layout.Section oneThird>
-                    <Card>
-                        <ResourceList
-                            resourceName={{ singular: 'customer', plural: 'customers' }}
-                            items={[
-                                {
-                                    id: 1,
-                                },
-                            ]}
-                            renderItem={(item) => {
-                                const { id } = item;
-                                return (
-                                    <ResourceItem verticalAlignment="center" id={id} media={<Icon color="primary" size="large" source={StoreMajor} />}>
-                                        <h3>
-                                            <TextStyle variation="strong">Store Id</TextStyle>
-                                        </h3>
-                                        <div>{resultStoreId}</div>
-                                    </ResourceItem>
-                                );
-                            }}
-                        />
-                    </Card>
-                </Layout.Section>
-                <Layout.Section oneThird>
-                    <Card>
-                        <ResourceList
-                            resourceName={{ singular: 'customer', plural: 'customers' }}
-                            items={[
-                                {
-                                    id: 145,
-                                },
-                            ]}
-                            renderItem={(item) => {
-                                const { id } = item;
-                                return (
-                                    <ResourceItem verticalAlignment="center" id={id} media={<Icon color="primary" name={resultSurname + ', ' + resultFirstName} source={ProfileMinor} />}>
-                                        <h3>
-                                            <TextStyle variation="strong">Last, First Name</TextStyle>
-                                        </h3>
-                                        <div>{resultSurname + ', ' + resultFirstName}</div>
-                                    </ResourceItem>
-                                );
-                            }}
-                        />
-                    </Card>
-                </Layout.Section>
-            </Layout>
 
-            <br />
-            <br />
-            <Layout>
-                <Layout.Section oneThird>
-                    <Card>
-                        <ResourceList
-                            resourceName={{ singular: 'customer', plural: 'customers' }}
-                            items={[
-                                {
-                                    id: 145,
-                                },
-                            ]}
-                            renderItem={(item) => {
-                                const { id } = item;
-                                return (
-                                    <ResourceItem verticalAlignment="center" id={id} media={<Icon color="primary" size="large" source={LocationMajor} />}>
-                                        <h3>
-                                            <TextStyle variation="strong">Country</TextStyle>
-                                        </h3>
-                                        <div>{resultCountry}</div>
-                                    </ResourceItem>
-                                );
-                            }}
-                        />
+            {loadingPage ? (
+                <Loading />
+            ) : (
+                <div>
+                    <Layout>
+                        <Layout.Section oneThird>
+                            <Card>
+                                <ResourceList
+                                    resourceName={{ singular: 'customer', plural: 'customers' }}
+                                    items={[
+                                        {
+                                            id: 1,
+                                        },
+                                    ]}
+                                    renderItem={(item) => {
+                                        const { id } = item;
+                                        return (
+                                            <ResourceItem verticalAlignment="center" id={id} media={<Icon color="primary" size="large" source={StoreMajor} />}>
+                                                <h3>
+                                                    <TextStyle variation="strong">Store Id</TextStyle>
+                                                </h3>
+                                                <div>{resultStoreId}</div>
+                                            </ResourceItem>
+                                        );
+                                    }}
+                                />
+                            </Card>
+                        </Layout.Section>
+                        <Layout.Section oneThird>
+                            <Card>
+                                <ResourceList
+                                    resourceName={{ singular: 'customer', plural: 'customers' }}
+                                    items={[
+                                        {
+                                            id: 145,
+                                        },
+                                    ]}
+                                    renderItem={(item) => {
+                                        const { id } = item;
+                                        return (
+                                            <ResourceItem verticalAlignment="center" id={id} media={<Icon color="primary" name={resultSurname + ', ' + resultFirstName} source={ProfileMinor} />}>
+                                                <h3>
+                                                    <TextStyle variation="strong">Last, First Name</TextStyle>
+                                                </h3>
+                                                <div>{resultSurname + ', ' + resultFirstName}</div>
+                                            </ResourceItem>
+                                        );
+                                    }}
+                                />
+                            </Card>
+                        </Layout.Section>
+                    </Layout>
+
+                    <br />
+                    <br />
+                    <Layout>
+                        <Layout.Section oneThird>
+                            <Card>
+                                <ResourceList
+                                    resourceName={{ singular: 'customer', plural: 'customers' }}
+                                    items={[
+                                        {
+                                            id: 145,
+                                        },
+                                    ]}
+                                    renderItem={(item) => {
+                                        const { id } = item;
+                                        return (
+                                            <ResourceItem verticalAlignment="center" id={id} media={<Icon color="primary" size="large" source={LocationMajor} />}>
+                                                <h3>
+                                                    <TextStyle variation="strong">Country</TextStyle>
+                                                </h3>
+                                                <div>{resultCountry}</div>
+                                            </ResourceItem>
+                                        );
+                                    }}
+                                />
+                            </Card>
+                        </Layout.Section>
+                        <Layout.Section oneThird>
+                            <Card>
+                                <ResourceList
+                                    resourceName={{ singular: 'customer', plural: 'customers' }}
+                                    items={[
+                                        {
+                                            id: 145,
+                                        },
+                                    ]}
+                                    renderItem={(item) => {
+                                        const { id } = item;
+                                        return (
+                                            <ResourceItem verticalAlignment="center" id={id} media={<Icon color="primary" backdrop source={LocationMajor} />}>
+                                                <h3>
+                                                    <TextStyle variation="strong">City</TextStyle>
+                                                </h3>
+                                                <div>{resultCity}</div>
+                                            </ResourceItem>
+                                        );
+                                    }}
+                                />
+                            </Card>
+                        </Layout.Section>
+                    </Layout>
+
+                    <br />
+                    <br />
+
+                    <Card sectioned title="E-mail Address">
+                        <FormLayout>
+                            <FormLayout.Group>
+                                <TextField value={emailMessage} onChange={handleEmailChange} autoComplete="off" />
+
+                                <Button onClick={() => upsertEmail()} loading={sendLoading}>
+                                    Save
+                                </Button>
+                            </FormLayout.Group>
+                        </FormLayout>
                     </Card>
-                </Layout.Section>
-                <Layout.Section oneThird>
-                    <Card>
-                        <ResourceList
-                            resourceName={{ singular: 'customer', plural: 'customers' }}
-                            items={[
-                                {
-                                    id: 145,
-                                },
-                            ]}
-                            renderItem={(item) => {
-                                const { id } = item;
-                                return (
-                                    <ResourceItem verticalAlignment="center" id={id} media={<Icon color="primary" backdrop source={LocationMajor} />}>
-                                        <h3>
-                                            <TextStyle variation="strong">City</TextStyle>
-                                        </h3>
-                                        <div>{resultCity}</div>
-                                    </ResourceItem>
-                                );
-                            }}
-                        />
-                    </Card>
-                </Layout.Section>
-            </Layout>
-
-            <br />
-            <br />
-
-            <Card sectioned title="E-mail Address">
-                <Stack alignment="center">
-                    <TextField value={emailMessage} onChange={handleEmailChange} autoComplete="off" />
-
-                    <Button onClick={() => upsertEmail()} loading={sendLoading}>
-                        Save
-                    </Button>
-                </Stack>
-            </Card>
+                </div>
+            )}
         </Page>
     );
 }

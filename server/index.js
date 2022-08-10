@@ -12,7 +12,6 @@ import MailValidator from './validate/mailValidator.js';
 import MailService from './service/mailService.js';
 import IsNotValidUrlException from './exception/isNotValidUrlException.js';
 import { urlFormatter } from './utility/stringUtility.js';
-import * as mongoDB from 'mongodb';
 import { collections } from './database.config.js';
 import ContactSupportService from './service/contactSupportService.js';
 import MailHistoryService from './service/mailHistoryService.js';
@@ -26,7 +25,7 @@ import ProductMailHistoryService from './service/productMailHistoryService.js';
 import StoreService from './service/storeService.js';
 import MerchantsProductsService from './service/merchantsProducts.js';
 import ProductHistoryService from './service/ProductHistoryService.js';
-import setDbActive from './static/db.js';
+import { logger } from './utility/logUtility.js';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -111,7 +110,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             response = await mailHistoryService.getMailHistoryByUserid(session.onlineAccessInfo.associated_user.storeId, body.date_type);
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
         }
 
         res.status(200).send(JSON.stringify(response));
@@ -129,7 +128,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             return res.status(200).send(JSON.stringify(products));
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
             return res.status(401).send();
         }
     });
@@ -143,7 +142,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             return res.status(200).send(JSON.stringify(products));
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
             return res.status(401).send();
         }
     });
@@ -165,7 +164,6 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     });
 
     app.post('/contact-support', verifyRequest(app), async (req, res) => {
-        console.log('contact-support');
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
@@ -175,7 +173,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             await contactSupportService.saveContactSupportService(session.onlineAccessInfo.associated_user.storeId, body.subject, body.message, body.topic);
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
         }
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
@@ -183,16 +181,14 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     app.post('/search', verifyRequest(app), async (req, res) => {
         let searchMapper = new SearchMapper();
         let searchService = new SearchService();
-        console.log('search');
         try {
             let searchModel = searchMapper.setSearchMapper(req.body.storeId, req);
 
             let result = await searchService.getSearch(searchModel);
-            console.log(searchModel);
 
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
         }
 
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
@@ -201,23 +197,20 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     app.post('/search-test', verifyRequest(app), async (req, res) => {
         let searchMapper = new SearchMapper();
         let searchService = new SearchService();
-        console.log('search');
         try {
             let searchModel = searchMapper.setSearchMapper(req.body.storeId, req);
 
             let result = await searchService.getSearch(searchModel);
-            console.log(searchModel);
 
             return res.status(200).send(result);
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
         }
 
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
 
     app.post('/dashboard-info', verifyRequest(app), async (req, res) => {
-        console.log('dashboard-info');
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
@@ -229,7 +222,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
         }
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
@@ -246,7 +239,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
         }
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
@@ -255,7 +248,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         try {
             return res.status(200).send('asdsa');
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
             return res.status(401).send();
         }
 
@@ -282,7 +275,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             if (e instanceof IsNotValidUrlException) {
                 return res.status(422).send(e.message);
             }
-            console.log(e);
+            logger.error([__filename, e].join(' '));
             return res.status(422).send(e.message);
         }
 
@@ -307,7 +300,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(422).send(e.message);
         }
 
-        return res.status(200).send(JSON.stringify({ data: 'Url updated successfully' }));
+        return res.status(200).send(JSON.stringify({ data: 'AddStore updated successfully' }));
     });
 
     app.get('/profile-info', verifyRequest(app), async (req, res) => {
@@ -329,7 +322,6 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             let urlToScrapService = new UrlToScrapService();
 
             let deletedArray = body.urls;
-            console.log(deletedArray);
             for (const item of deletedArray) {
                 await urlToScrapService.deleteUrlToScrapService(item);
             }
@@ -337,7 +329,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(422).send(e.message);
         }
 
-        return res.status(200).send(JSON.stringify({ data: 'Url deleted successfully' }));
+        return res.status(200).send(JSON.stringify({ data: 'AddStore deleted successfully' }));
     });
 
     app.get('/user-mail', verifyRequest(app), async (req, res) => {
@@ -345,7 +337,6 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
-            console.log(session);
             let result = await mailService.getStoreMailByStoreId(session.onlineAccessInfo.associated_user.storeId);
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
@@ -381,16 +372,13 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
     app.get('/get-user-products', verifyRequest(app), async (req, res) => {
         try {
-            console.log('asdsa');
             const test_session = await Shopify.Utils.loadCurrentSession(req, res);
             let products = await Product.all({
                 session: test_session,
                 fields: 'id,images,title',
             });
-
-            console.log(products);
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
             return res.status(401).send();
         }
 
@@ -404,13 +392,11 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             const { verified, topic, domain, body } = await verifyWebhook(req, shopifySecret);
 
-            console.log('/customers-data_request');
-            console.log({ verified, topic, domain, body });
             if (!verified) {
                 return res.status(401).send();
             }
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
             return res.status(401).send();
         }
 
@@ -423,13 +409,11 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             const { verified, topic, domain, body } = await verifyWebhook(req, shopifySecret);
 
-            console.log('/customers-redact');
-            console.log({ verified, topic, domain, body });
             if (!verified) {
                 return res.status(401).send();
             }
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
             return res.status(401).send();
         }
 
@@ -442,13 +426,11 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             const { verified, topic, domain, body } = await verifyWebhook(req, shopifySecret);
 
-            console.log('/shop-redact');
-            console.log({ verified, topic, domain, body });
             if (!verified) {
                 return res.status(401).send();
             }
         } catch (e) {
-            console.log(e);
+            logger.error([__filename, e].join(' '));
             return res.status(401).send();
         }
 

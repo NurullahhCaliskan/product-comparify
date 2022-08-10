@@ -1,6 +1,5 @@
 import { Shopify } from '@shopify/shopify-api';
 import { getBrowserName } from '../utility/helper.js';
-import logHistoryService from '../service/logHistoryService.js';
 import LogHistoryService from '../service/logHistoryService.js';
 import sizeof from 'object-sizeof';
 import { dbActive } from '../static/db.js';
@@ -33,11 +32,12 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
         }
 
         res.on('finish', () => {
+            let logJson = {};
             try {
                 const { rawHeaders, httpVersion, method, socket, url } = req;
                 const { remoteAddress, remoteFamily } = socket;
 
-                let logJson = {
+                logJson = {
                     storeId: session.onlineAccessInfo.associated_user.storeId,
                     userId: session.onlineAccessInfo.associated_user.id,
                     timestamp: Date.now(),
@@ -56,6 +56,7 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
                 logHistoryService.saveLogHistory(logJson);
             } catch (e) {
                 logger.error(__filename + e);
+                logger.error([__filename, e, JSON.stringify(logJson)].join(' '));
             }
         });
 
@@ -101,7 +102,7 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
 
             res.status(403);
             res.header('X-Shopify-API-Request-Failure-Reauthorize', '1');
-            res.header('X-Shopify-API-Request-Failure-Reauthorize-Url', `/auth?shop=${shop}`);
+            res.header('X-Shopify-API-Request-Failure-Reauthorize-AddStore', `/auth?shop=${shop}`);
             res.end();
         } else {
             res.redirect(`/auth?shop=${shop}`);

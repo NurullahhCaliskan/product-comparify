@@ -178,14 +178,6 @@ export function CompareModal(props) {
 
                         <Card.Section>
                             <FormLayout.Group condensed>
-                                <TextStyle variation={'strong'}>ID</TextStyle>
-                                <TextStyle variation={'subdued'}>{getAfterLastCharacter(merchantProduct.id, '/')}</TextStyle>
-                                <TextStyle variation="subdued">{competitorsProduct.id}</TextStyle>
-                            </FormLayout.Group>
-                        </Card.Section>
-
-                        <Card.Section>
-                            <FormLayout.Group condensed>
                                 <TextStyle variation={'strong'}>Title</TextStyle>
                                 <TextStyle variation={'subdued'}>{merchantProduct.title}</TextStyle>
                                 <TextStyle variation="subdued">{competitorsProduct.title}</TextStyle>
@@ -237,14 +229,6 @@ export function CompareModal(props) {
                                 <TextStyle variation={'strong'}>Select Variant</TextStyle>
                                 <Select options={merchantProduct.variantList} onChange={handleSelectChangeMerchant} value={selectedMerchantVariantOption} />
                                 <Select options={competitorsProduct.variantList} onChange={handleSelectChangeCompetitor} value={selectedCompetitorVariantOption} />
-                            </FormLayout.Group>
-                        </Card.Section>
-
-                        <Card.Section>
-                            <FormLayout.Group condensed>
-                                <TextStyle variation={'strong'}>ID</TextStyle>
-                                <TextStyle variation={'subdued'}>{getAfterLastCharacter(selectedMerchantVariant.id, '/')}</TextStyle>
-                                <TextStyle variation="subdued">{selectedCompetitorVariant.id}</TextStyle>
                             </FormLayout.Group>
                         </Card.Section>
 
