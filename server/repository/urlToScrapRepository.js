@@ -101,6 +101,28 @@ export default class UrlToScrapRepository {
             });
     }
 
+    /***
+     * user url relation exists check
+     * @param url url
+     * @param storeId storeId
+     * @return {Promise<void>}
+     */
+    async storeMaximumLimitCheck(storeId) {
+        let response = 0;
+        await collections.storeWebsitesRelationModel
+            ?.count({ storeId: storeId })
+            .then((resp) => {
+                response = resp;
+
+                if (response >= 30) {
+                    throw new IsNotValidUrlException(JSON.stringify({ data: 'Maximum 30 website monitor up' }));
+                }
+            })
+            .catch((e) => {
+                throw new IsNotValidUrlException(JSON.stringify({ data: 'Maximum 30 website monitor up' }));
+            });
+    }
+
     /**
      * get user's url
      * @param storeId storeId

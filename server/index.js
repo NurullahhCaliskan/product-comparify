@@ -268,6 +268,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             let productHistoryCrawlerQueueService = new ProductHistoryCrawlerQueueService();
             await urlToScrapService.isExistsUserToUrlRelation(body.url, session.onlineAccessInfo.associated_user.storeId);
+            await urlToScrapService.storeMaximumLimitCheck(session.onlineAccessInfo.associated_user.storeId);
             await urlToScrapService.addUrlToScrapService(body.url, session.onlineAccessInfo.associated_user.storeId);
 
             await productHistoryCrawlerQueueService.addToQueue(body.url);

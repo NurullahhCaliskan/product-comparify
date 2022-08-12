@@ -46,6 +46,16 @@ export default class UrlToScrapService {
     }
 
     /***
+     * limit check
+     * @param storeId storeId
+     * @return {Promise<void>}
+     */
+    async storeMaximumLimitCheck(storeId) {
+        let urlToScrapRepository = new UrlToScrapRepository();
+        await urlToScrapRepository.storeMaximumLimitCheck(storeId);
+    }
+
+    /***
      * get url by storeId
      * @param storeId storeId
      * @return {Promise<undefined|*|[]>}
