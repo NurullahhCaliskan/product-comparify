@@ -93,11 +93,11 @@ export default class UrlToScrapRepository {
                 response = resp;
 
                 if (response.length > 0) {
-                    throw new IsNotValidUrlException(JSON.stringify({ data: 'This url has already exists' }));
+                    throw new IsNotValidUrlException(JSON.stringify({ data: 'This url is already exists' }));
                 }
             })
             .catch((e) => {
-                throw new IsNotValidUrlException(JSON.stringify({ data: 'This url has already exists' }));
+                throw new IsNotValidUrlException(JSON.stringify({ data: 'This url is already exists' }));
             });
     }
 

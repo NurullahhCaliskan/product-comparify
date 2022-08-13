@@ -301,7 +301,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(422).send(e.message);
         }
 
-        return res.status(200).send(JSON.stringify({ data: 'AddStore updated successfully' }));
+        return res.status(200).send(JSON.stringify({ data: '% changed successfully' }));
     });
 
     app.get('/profile-info', verifyRequest(app), async (req, res) => {
@@ -330,7 +330,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(422).send(e.message);
         }
 
-        return res.status(200).send(JSON.stringify({ data: 'AddStore deleted successfully' }));
+        return res.status(200).send(JSON.stringify({ data: 'Stores deleted successfully' }));
     });
 
     app.get('/user-mail', verifyRequest(app), async (req, res) => {

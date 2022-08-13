@@ -35,11 +35,16 @@ export function CompetitorsProductsCard(prop) {
         }
         setLoadingUrl(true);
         try {
+            console.log(item);
             const productListResponse = await fetch('/compare-product', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     id: item.node.id,
+                    handle: item.node.handle,
+                    vendor: item.node.vendor,
+                    tags: item.node.tags,
+                    productType: item.node.productType,
                     search: queryValue,
                     offset: pageIndexWithoutState * 10,
                 }),
