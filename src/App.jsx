@@ -8,7 +8,7 @@ import '@shopify/polaris/build/esm/styles.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HomePage } from './components/HomePage';
 import { ServiceUnavailable } from './components/serviceUnavailable/ServiceUnavailable.jsx';
-
+import './css/main.css';
 export default function App() {
     return (
         <PolarisProvider i18n={translations}>

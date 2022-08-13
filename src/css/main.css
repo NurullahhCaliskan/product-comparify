@@ -1,0 +1,9 @@
+.Polaris-Tooltip-TooltipOverlay__Content {
+    position: relative;
+    border-radius: 0.1875rem;
+    background-color: rgba(255, 255, 255, 1);
+    color: rgba(32, 34, 35, 1);
+    max-width: 500px;
+    padding: 0.25rem 0.5rem;
+    word-break: break-word;
+}

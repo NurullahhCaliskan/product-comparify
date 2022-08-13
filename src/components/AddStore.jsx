@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Avatar, Button, Card, EmptySearchResult, EmptyState, Page, Pagination, ResourceList, Stack, TextField, TextStyle, Toast, Badge } from '@shopify/polaris';
-import { DeleteMinor } from '@shopify/polaris-icons';
+import { Avatar, Button, Card, EmptySearchResult, EmptyState, Page, Icon, Pagination, ResourceList, Tooltip, Stack, Thumbnail, TextField, TextStyle, Toast, Badge } from '@shopify/polaris';
+import { DeleteMinor, QuestionMarkInverseMajor } from '@shopify/polaris-icons';
 import { userLoggedInFetch } from '../App';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { Loading } from '../helper/Loading.jsx';
 import addStore from '../assets/addstore.svg';
-
+import addStoreGif from './../assets/info/addStore.gif';
 export function AddStore() {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
@@ -170,7 +170,30 @@ export function AddStore() {
             {loadingUrl ? (
                 <Loading />
             ) : (
-                <Page title="Add Store" subtitle="Enter the link of the stores you want to follow below. Add to your list by clicking the button." fullWidth>
+                <Page
+                    title="Add Store"
+                    titleMetadata={
+                        <Tooltip
+                            active
+                            content={
+                                <img
+                                    alt=""
+                                    width="100%"
+                                    height="100%"
+                                    style={{
+                                        objectFit: 'cover',
+                                        objectPosition: 'center',
+                                    }}
+                                    src={addStoreGif}
+                                />
+                            }
+                        >
+                            <Icon source={QuestionMarkInverseMajor} color="base" />
+                        </Tooltip>
+                    }
+                    subtitle="Enter the link of the stores you want to follow below. Add to your list by clicking the button."
+                    fullWidth
+                >
                     {showUrls === false ? (
                         <Card sectioned>
                             <EmptyState heading="Add a url to get started" action={{ content: 'Add Store', onAction: () => changeShowList() }} image={addStore} fullWidth>

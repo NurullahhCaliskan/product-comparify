@@ -11124,3 +11124,12 @@ body {
     border: 0 !important;
     white-space: nowrap !important;
 }
+.Polaris-Tooltip-TooltipOverlay__Content {
+    position: relative;
+    border-radius: 0.1875rem;
+    background-color: #fff;
+    color: #202223;
+    max-width: 500px;
+    padding: 0.25rem 0.5rem;
+    word-break: break-word;
+}
