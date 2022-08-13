@@ -5,7 +5,7 @@ import { userLoggedInFetch } from '../App';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { Loading } from '../helper/Loading.jsx';
 import addStore from '../assets/addstore.svg';
-import addStoreGif from './../assets/info/addStore.gif';
+import addStoreGif from '../assets/info/addStore.gif';
 
 export function AddStore() {
     const app = useAppBridge();
