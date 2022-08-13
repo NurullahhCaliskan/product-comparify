@@ -11133,3 +11133,11 @@ body {
     padding: 0.25rem 0.5rem;
     word-break: break-word;
 }
+th {
+    text-align: center !important;
+}
+@media screen and (min-width: 769px) {
+    .show-hamburger {
+        display: none;
+    }
+}

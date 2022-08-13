@@ -116,6 +116,7 @@ export function Alarm() {
         minWidth: '24px',
         textAlign: 'right',
     };
+
     const rowMarkup =
         urlList && urlList.length > 0
             ? urlList.map(({ id, website, websites, location, alarm, amountSpent, value }, index) => (
@@ -172,7 +173,7 @@ export function Alarm() {
                     <Banner title="Alarm system working every 12:00AM GMT+1. Mail will be sent the next day." status="warning" />
                     <br />
                     <Card>
-                        <IndexTable loading={loadingUrl} resourceName={resourceName} itemCount={urlList?.length} selectable={false} headings={[{ title: '' }, { title: 'Website' }, { title: 'Alert at Least%' }, { title: 'Alarm Status' }]}>
+                        <IndexTable loading={loadingUrl} resourceName={resourceName} itemCount={urlList?.length} selectable={false} headings={[{ title: '' }, { title: 'Website' }, { title: 'Min Price Change%' }, { title: 'Alarm Status' }]}>
                             {rowMarkup}
                         </IndexTable>
                     </Card>
