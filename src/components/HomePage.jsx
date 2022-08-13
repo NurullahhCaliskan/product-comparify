@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { Card, Frame, Icon, Layout, Loading, Navigation, SkeletonBodyText, SkeletonDisplayText, SkeletonPage, TextContainer, Toast, TopBar } from '@shopify/polaris';
+import { Card, Frame, Icon, Layout, Loading, Navigation, SkeletonBodyText, SkeletonDisplayText, SkeletonPage, TextContainer, Button, Toast, TopBar } from '@shopify/polaris';
 import { AddProductMajor, ConversationMinor, ExchangeMajor, LocationMajor, NotificationMajor, ProfileMinor, ReportMinor, SearchMinor } from '@shopify/polaris-icons';
 import { AddStore } from './AddStore.jsx';
 import { Email } from './Email.jsx';
@@ -10,6 +10,7 @@ import { ContactUs } from './ContactUs.jsx';
 import { Profile } from './Profile';
 import { Dashboard } from './dashboard/Dashboard.jsx';
 import { Compare } from './compare/Compare.jsx';
+import { MobileHamburgerMajor } from '@shopify/polaris-icons';
 
 export function HomePage() {
     const app = useAppBridge();
@@ -114,9 +115,14 @@ export function HomePage() {
     const pageMarkup = isLoading ? loadingPageMarkup : actualPageMarkup;
 
     return (
-        <Frame primary style={{ color: 'var(--p-border-success) !important' }} navigation={navigationMarkup} showMobileNavigation={mobileNavigationActive} onNavigationDismiss={toggleMobileNavigationActive} skipToContentTarget={skipToContentRef.current}>
+        <Frame primary navigation={navigationMarkup} showMobileNavigation={mobileNavigationActive} onNavigationDismiss={toggleMobileNavigationActive} skipToContentTarget={skipToContentRef.current}>
             {loadingMarkup}
 
+            <div className={'show-hamburger'}>
+                <Button onClick={toggleMobileNavigationActive}>
+                    <Icon source={MobileHamburgerMajor} />
+                </Button>
+            </div>
             {pageMarkup}
         </Frame>
     );

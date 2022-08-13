@@ -1,4 +1,4 @@
-import { Banner, Card, IndexTable, Page, Subheading, MediaCard, Popover, Badge, Button, VideoThumbnail, ActionList, DisplayText, TextStyle, Thumbnail, Layout, ResourceList } from '@shopify/polaris';
+import { Banner, Card, IndexTable, Page, Subheading, MediaCard, Popover, Badge, Button, VideoThumbnail, ActionList, DisplayText, TextStyle, Thumbnail, Layout, ResourceList, Tooltip, Icon } from '@shopify/polaris';
 import { Loading } from '../../helper/Loading.jsx';
 import { MerchantProductCard } from './MerchantProductCard.jsx';
 import axios from 'axios';
@@ -8,6 +8,8 @@ import { userLoggedInFetch } from '../../App.jsx';
 import { useEffect, useState } from 'react';
 import { CompetitorsProductsCard } from './CompetitorsProductsCard.jsx';
 import { CompareModal } from './CompareModal.jsx';
+import compareGif from '../../assets/info/compare.gif';
+import { QuestionMarkInverseMajor } from '@shopify/polaris-icons';
 
 export function Compare() {
     const app = useAppBridge();
@@ -25,7 +27,29 @@ export function Compare() {
     };
 
     return (
-        <Page compactTitle title="Compare" subtitle="To use the comparison structure, first select a product available in your store. Next, select the product you want to compare and click the 'Search' button.">
+        <Page
+            compactTitle
+            title="Compare"
+            titleMetadata={
+                <Tooltip
+                    content={
+                        <img
+                            alt=""
+                            width="100%"
+                            height="100%"
+                            style={{
+                                objectFit: 'cover',
+                                objectPosition: 'center',
+                            }}
+                            src={compareGif}
+                        />
+                    }
+                >
+                    <Icon source={QuestionMarkInverseMajor} color="base" />
+                </Tooltip>
+            }
+            subtitle="To use the comparison structure, first select a product available in your store. Next, select the product you want to compare and click the 'Search' button."
+        >
             <Subheading>Comparisons can be made with only one product.</Subheading>
             <br />
             <Layout>

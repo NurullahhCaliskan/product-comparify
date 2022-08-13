@@ -1,9 +1,10 @@
 import { useCallback, useState } from 'react';
-import { Avatar, Banner, Button, Card, Icon, IndexTable, Page, RangeSlider, TextStyle, Toast } from '@shopify/polaris';
-import { CircleCancelMinor, CircleTickMinor, DomainsMajor } from '@shopify/polaris-icons';
+import { Avatar, Banner, Button, Card, Icon, IndexTable, Page, RangeSlider, TextStyle, Toast, Tooltip } from '@shopify/polaris';
+import { CircleCancelMinor, CircleTickMinor, DomainsMajor, QuestionMarkInverseMajor } from '@shopify/polaris-icons';
 import { userLoggedInFetch } from '../App';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { Loading } from '../helper/Loading.jsx';
+import setAlertGif from '../assets/info/setAlert.gif';
 
 export function Alarm() {
     const app = useAppBridge();
@@ -141,7 +142,28 @@ export function Alarm() {
             : '';
 
     return (
-        <Page title="Alarm" subtitle="Manage an alarm according to the website.">
+        <Page
+            title="Alarm"
+            titleMetadata={
+                <Tooltip
+                    content={
+                        <img
+                            alt=""
+                            width="100%"
+                            height="100%"
+                            style={{
+                                objectFit: 'cover',
+                                objectPosition: 'center',
+                            }}
+                            src={setAlertGif}
+                        />
+                    }
+                >
+                    <Icon source={QuestionMarkInverseMajor} color="base" />
+                </Tooltip>
+            }
+            subtitle="Manage an alarm according to the website."
+        >
             {toastMarkup}
             {loadingPage ? (
                 <Loading />

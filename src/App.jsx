@@ -1,4 +1,3 @@
-import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/client';
 import { Provider as AppBridgeProvider, useAppBridge } from '@shopify/app-bridge-react';
 import { authenticatedFetch } from '@shopify/app-bridge-utils';
 import { Redirect } from '@shopify/app-bridge/actions';

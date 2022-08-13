@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Avatar, Button, Card, EmptySearchResult, EmptyState, Page, Icon, Pagination, ResourceList, Tooltip, Stack, Thumbnail, TextField, TextStyle, Toast, Badge } from '@shopify/polaris';
-import { DeleteMinor, QuestionMarkInverseMajor } from '@shopify/polaris-icons';
+import { Avatar, Badge, Button, Card, EmptySearchResult, EmptyState, Icon, Page, Pagination, ResourceList, Stack, TextField, TextStyle, Toast, Tooltip } from '@shopify/polaris';
+import { QuestionMarkInverseMajor } from '@shopify/polaris-icons';
 import { userLoggedInFetch } from '../App';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { Loading } from '../helper/Loading.jsx';
 import addStore from '../assets/addstore.svg';
 import addStoreGif from './../assets/info/addStore.gif';
+
 export function AddStore() {
     const app = useAppBridge();
     const fetch = userLoggedInFetch(app);
@@ -174,7 +175,6 @@ export function AddStore() {
                     title="Add Store"
                     titleMetadata={
                         <Tooltip
-                            active
                             content={
                                 <img
                                     alt=""
