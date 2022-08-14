@@ -144,7 +144,7 @@ export function Alarm() {
 
     return (
         <Page
-            title="Alarm"
+            title="Set Alarm"
             titleMetadata={
                 <Tooltip
                     content={
@@ -163,7 +163,7 @@ export function Alarm() {
                     <Icon source={QuestionMarkInverseMajor} color="base" />
                 </Tooltip>
             }
-            subtitle="Manage an alarm according to the website."
+            subtitle="Set alert % of each website. When you enter the alarm value, the value and above changes are sent as an e-mail."
         >
             {toastMarkup}
             {loadingPage ? (
