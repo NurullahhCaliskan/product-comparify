@@ -35,9 +35,13 @@ export default class ProductHistoryRepository {
         aggregateArray.push({ $skip: offset });
         aggregateArray.push({ $limit: 10 });
         return await collections.productHistoryModel
-            ?.aggregate(aggregateArray, {
-                collation: { locale: 'en', strength: 1 },
-            })
+            ?.aggregate(
+                aggregateArray,
+                {
+                    collation: { locale: 'en', strength: 1 },
+                },
+                { allowDiskUse: true }
+            )
             .toArray();
     }
 
