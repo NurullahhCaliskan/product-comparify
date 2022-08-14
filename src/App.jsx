@@ -1,7 +1,7 @@
 import { Provider as AppBridgeProvider } from '@shopify/app-bridge-react';
 import { authenticatedFetch } from '@shopify/app-bridge-utils';
 import { Redirect } from '@shopify/app-bridge/actions';
-import { AppProvider as PolarisProvider } from '@shopify/polaris';
+import { AppProvider as PolarisProvider, Frame } from '@shopify/polaris';
 import translations from '@shopify/polaris/locales/en.json';
 import '@shopify/polaris/build/esm/styles.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -24,17 +24,19 @@ export default function App() {
                     forceRedirect: true,
                 }}
             >
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/" element={<Profile />} />
-                        <Route path="/contact-us" element={<ContactUs />} />
-                        <Route path="/add-store" element={<AddStore />} />
-                        <Route path="/set-alarm" element={<Alarm />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/compare" element={<Compare />} />
-                        <Route path="expenses" element={<ServiceUnavailable />} />
-                    </Routes>
-                </BrowserRouter>
+                <Frame>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/" element={<Profile />} />
+                            <Route path="/contact-us" element={<ContactUs />} />
+                            <Route path="/add-store" element={<AddStore />} />
+                            <Route path="/set-alarm" element={<Alarm />} />
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/compare" element={<Compare />} />
+                            <Route path="expenses" element={<ServiceUnavailable />} />
+                        </Routes>
+                    </BrowserRouter>
+                </Frame>
             </AppBridgeProvider>
         </PolarisProvider>
     );

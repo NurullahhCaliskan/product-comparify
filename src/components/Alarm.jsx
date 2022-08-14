@@ -31,9 +31,10 @@ export function Alarm() {
 
     const [urlList, setUrlList] = useState(getUrlList);
 
-    const radioButtonKeyListener = async (item) => {
-        console.log(item);
-
+    const radioButtonKeyListener = async (e, item) => {
+        if (event.type !== 'mouseup' && event.type !== 'touchend') {
+            return;
+        }
         if (loadingUrl) {
             return;
         }
@@ -117,6 +118,13 @@ export function Alarm() {
         textAlign: 'right',
     };
 
+    const handleEvent = (event) => {
+        console.log(event.type);
+        if (event.type === 'mouseup' || event.type === 'touchend') {
+            console.log('up');
+        }
+    };
+
     const rowMarkup =
         urlList && urlList.length > 0
             ? urlList.map(({ id, website, websites, location, alarm, amountSpent, value }, index) => (
@@ -128,7 +136,7 @@ export function Alarm() {
                           <TextStyle variation="strong">{website}</TextStyle>
                       </IndexTable.Cell>
                       <IndexTable.Cell>
-                          <div onClickCapture={() => radioButtonKeyListener(urlList[index])}>
+                          <div onTouchEnd={(e) => radioButtonKeyListener(e, urlList[index])} onMouseUp={(e) => radioButtonKeyListener(e, urlList[index])} style={{ cursor: 'pointer !important' }}>
                               <RangeSlider min={1} max={100} value={value} onChange={(e) => setRangeValue(e, index)} suffix={<p style={suffixStyles}>{value}</p>} output disabled={!alarm} />
                           </div>
                       </IndexTable.Cell>
