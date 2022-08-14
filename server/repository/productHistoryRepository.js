@@ -11,20 +11,14 @@ export default class ProductHistoryRepository {
         aggregateArray.push({
             $lookup: {
                 from: 'store-websites-relation',
+                localField: 'website',
+                foreignField: 'website',
                 as: 'storeWebsiteRelation',
-                pipeline: [
-                    {
-                        $match: {
-                            $expr: {
-                                $and: [{ $eq: ['storeWebsiteRelation.storeId', storeId] }, { $eq: ['storeWebsiteRelation.website', 'store-websites-relation.website'] }],
-                            },
-                        },
-                    },
-                ],
             },
         });
 
         aggregateArray.push({ $match: { product_type: productType } });
+        aggregateArray.push({ $match: { 'storeWebsiteRelation.storeId': storeId } });
 
         if (search) {
             aggregateArray.push({ $match: { title: { $regex: new RegExp(search.trim()), $options: 'i' } } });
