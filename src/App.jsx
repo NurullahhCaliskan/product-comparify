@@ -5,9 +5,14 @@ import { AppProvider as PolarisProvider } from '@shopify/polaris';
 import translations from '@shopify/polaris/locales/en.json';
 import '@shopify/polaris/build/esm/styles.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { HomePage } from './components/HomePage';
 import { ServiceUnavailable } from './components/serviceUnavailable/ServiceUnavailable.jsx';
 import './css/main.css';
+import { Profile } from './components/Profile.jsx';
+import { ContactUs } from './components/ContactUs.jsx';
+import { AddStore } from './components/AddStore.jsx';
+import { Alarm } from './components/Alarm.jsx';
+import { Dashboard } from './components/dashboard/Dashboard.jsx';
+import { Compare } from './components/compare/Compare.jsx';
 
 export default function App() {
     return (
@@ -21,7 +26,12 @@ export default function App() {
             >
                 <BrowserRouter>
                     <Routes>
-                        <Route path="/" element={<HomePage />} />
+                        <Route path="/" element={<Profile />} />
+                        <Route path="/contact-us" element={<ContactUs />} />
+                        <Route path="/add-store" element={<AddStore />} />
+                        <Route path="/set-alarm" element={<Alarm />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/compare" element={<Compare />} />
                         <Route path="expenses" element={<ServiceUnavailable />} />
                     </Routes>
                 </BrowserRouter>

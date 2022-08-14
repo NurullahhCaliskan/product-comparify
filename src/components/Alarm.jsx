@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Avatar, Banner, Button, Card, Icon, IndexTable, Page, RangeSlider, TextStyle, Toast, Tooltip } from '@shopify/polaris';
-import { CircleCancelMinor, CircleTickMinor, DomainsMajor, QuestionMarkInverseMajor } from '@shopify/polaris-icons';
+import { QuestionMarkInverseMajor } from '@shopify/polaris-icons';
 import { userLoggedInFetch } from '../App';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { Loading } from '../helper/Loading.jsx';
