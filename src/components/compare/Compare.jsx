@@ -1,11 +1,8 @@
-import { Banner, Card, IndexTable, Page, Subheading, MediaCard, Popover, Badge, Button, VideoThumbnail, ActionList, DisplayText, TextStyle, Thumbnail, Layout, ResourceList, Tooltip, Icon } from '@shopify/polaris';
-import { Loading } from '../../helper/Loading.jsx';
+import { Icon, Layout, Page, Subheading, Tooltip } from '@shopify/polaris';
 import { MerchantProductCard } from './MerchantProductCard.jsx';
-import axios from 'axios';
-import { ProductsCard } from '../ProductsCard.jsx';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { userLoggedInFetch } from '../../App.jsx';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CompetitorsProductsCard } from './CompetitorsProductsCard.jsx';
 import { CompareModal } from './CompareModal.jsx';
 import compareGif from '../../assets/info/compare.gif';

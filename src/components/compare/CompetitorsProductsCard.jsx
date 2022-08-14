@@ -1,5 +1,5 @@
 import { Avatar, Button, Card, Filters, Pagination, ResourceItem, ResourceList, TextStyle } from '@shopify/polaris';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { userLoggedInFetch } from '../../App.jsx';
 import _ from 'lodash';
@@ -90,7 +90,7 @@ export function CompetitorsProductsCard(prop) {
 
         filterTimeout = setTimeout(async () => {
             await setPage(0);
-        }, 400);
+        }, 550);
     };
 
     const filterControl = (

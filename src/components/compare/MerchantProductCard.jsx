@@ -60,7 +60,7 @@ export function MerchantProductCard(prop) {
 
         filterTimeout = setTimeout(async () => {
             await getMerchantsProducts();
-        }, 400);
+        }, 550);
     };
 
     const resourceName = {

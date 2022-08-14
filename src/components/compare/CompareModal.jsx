@@ -1,10 +1,9 @@
-import { Button, Modal, TextContainer, Layout, Card, Image, List, FormLayout, TextField, TextStyle, Popover, ActionList, Thumbnail, Avatar, Select } from '@shopify/polaris';
-import { useState, useCallback, useEffect } from 'react';
+import { Card, FormLayout, Modal, Select, TextStyle, Thumbnail } from '@shopify/polaris';
+import { useCallback, useEffect, useState } from 'react';
 import _ from 'lodash';
 import { cartesian } from '../../utility/objectUtility.js';
 import priceWithCurrency from '../../utility/currenctUtility.js';
 import { humanReadableTime } from '../../utility/dateUtility.js';
-import { getAfterLastCharacter } from '../../utility/stringUtility.js';
 
 export function CompareModal(props) {
     const [active, setActive] = useState(false);
