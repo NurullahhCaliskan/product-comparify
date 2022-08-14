@@ -48,7 +48,7 @@ export function Compare() {
                     <Icon source={QuestionMarkInverseMajor} color="base" />
                 </Tooltip>
             }
-            subtitle="To use the comparison structure, first select a product available in your store. Next, select the product you want to compare and click the 'Search' button."
+            subtitle="To use the comparison structure, first select a product available in your store. Next, select the product you want to compare."
         >
             <Subheading>Comparisons can be made with only one product.</Subheading>
             <br />

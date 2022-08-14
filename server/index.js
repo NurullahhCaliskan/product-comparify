@@ -343,7 +343,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             await mailService.upsertUserMail(body.email, session.onlineAccessInfo.associated_user.storeId);
         } catch (e) {
-            return res.status(422).send(e.message);
+            return res.status(422).send(JSON.stringify({ data: e.message }));
         }
 
         return res.status(200).send(JSON.stringify({ data: 'Mail updated successfully' }));

@@ -164,6 +164,13 @@ export function AddStore() {
         return id;
     }
 
+    const handleKeyPress = async (event) => {
+        const enterKeyPressed = event.keyCode === 13;
+        if (enterKeyPressed) {
+            await addNewUrl();
+        }
+    };
+
     return (
         <div>
             {toastMarkup}
@@ -204,10 +211,11 @@ export function AddStore() {
                         <div>
                             <Card sectioned title="Add New Store">
                                 <Stack>
-                                    <TextField placeholder={'www.shopify.com'} value={urlFieldValue} onChange={handleUrlFieldChange} />
+                                    <div onKeyDown={handleKeyPress}>
+                                        <TextField placeholder={'www.shopify.com'} value={urlFieldValue} onChange={handleUrlFieldChange} />
+                                    </div>
 
                                     <Button onClick={() => addNewUrl()} loading={sendLoading}>
-                                        {' '}
                                         Add
                                     </Button>
                                 </Stack>

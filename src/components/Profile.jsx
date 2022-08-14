@@ -39,15 +39,22 @@ export function Profile() {
 
     const upsertEmail = async () => {
         setSendLoading(true);
-        const count = await fetch('/user-mail', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: emailMessage }),
-        }).then((res) => res.json());
+        try {
+            const response = await fetch('/user-mail', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailMessage }),
+            });
 
-        setToastContent({ data: 'Email Updated Successfully', error: false });
-        setActiveToast(true);
-        console.log('here');
+            const jsonValue = await response.json();
+
+            setToastContent({ data: jsonValue.data, error: !response.ok });
+            setActiveToast(true);
+        } catch (e) {
+            console.log(e);
+            setToastContent('error');
+            setActiveToast(true);
+        }
         setSendLoading(false);
         await getUrlList();
     };

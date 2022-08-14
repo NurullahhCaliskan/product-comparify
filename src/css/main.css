@@ -8,12 +8,10 @@
     word-break: break-word;
 }
 
-th {
-    text-align: center !important;
-}
-
 @media screen and (min-width: 769px) {
     .show-hamburger {
+        background-color: rgb(246, 246, 247) !important;
+        border: 0 !important;
         display: none;
     }
 }
