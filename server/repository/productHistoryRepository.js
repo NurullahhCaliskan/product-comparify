@@ -34,15 +34,7 @@ export default class ProductHistoryRepository {
         aggregateArray.push({ $setWindowFields: { output: { totalCount: { $count: {} } } } });
         aggregateArray.push({ $skip: offset });
         aggregateArray.push({ $limit: 10 });
-        return await collections.productHistoryModel
-            ?.aggregate(
-                aggregateArray,
-                {
-                    collation: { locale: 'en', strength: 1 },
-                },
-                { allowDiskUse: true }
-            )
-            .toArray();
+        return await collections.productHistoryModel?.aggregate(aggregateArray, { collation: { locale: 'en', strength: 1 }, allowDiskUse: true }).toArray();
     }
 
     async getSameProductsByProductCount(storeId, requestBody) {
