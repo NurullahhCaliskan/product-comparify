@@ -60,11 +60,6 @@ export function CompetitorsProductsCard(prop) {
     };
 
     useEffect(async () => {
-        if (clickedToRemoveFilter) {
-            await setPage(0);
-        }
-        clickedToRemoveFilter = false;
-
         doFilter(queryValue);
     }, [queryValue]);
 
@@ -91,9 +86,7 @@ export function CompetitorsProductsCard(prop) {
     };
 
     const doFilter = (query) => {
-        setQueryValue(query);
         clearTimeout(filterTimeout);
-        if (!query) return;
 
         filterTimeout = setTimeout(async () => {
             await setPage(0);

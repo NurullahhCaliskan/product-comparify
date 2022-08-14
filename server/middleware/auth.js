@@ -2,6 +2,7 @@ import { Shopify } from '@shopify/shopify-api';
 
 import topLevelAuthRedirect from '../helpers/top-level-auth-redirect.js';
 import SessionService from '../service/sessionService.js';
+import { MongoTopologyClosedError } from 'mongodb';
 
 export default function applyAuthMiddleware(app) {
     app.get('/auth', async (req, res) => {
@@ -66,6 +67,7 @@ export default function applyAuthMiddleware(app) {
             // Redirect to app with shop parameter upon auth
             res.redirect(`/?shop=${session.shop}&host=${host}`);
         } catch (e) {
+            console.log(e);
             switch (true) {
                 case e instanceof Shopify.Errors.InvalidOAuthError:
                     res.status(400);
@@ -75,6 +77,10 @@ export default function applyAuthMiddleware(app) {
                 case e instanceof Shopify.Errors.SessionNotFound:
                     // This is likely because the OAuth session cookie expired before the merchant approved the request
                     res.redirect(`/auth?shop=${req.query.shop}`);
+                    break;
+                case e instanceof MongoTopologyClosedError:
+                    res.status(503);
+                    res.send('We are in maintenance');
                     break;
                 default:
                     res.status(500);

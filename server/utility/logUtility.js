@@ -18,6 +18,7 @@ const mongoDbLog = new transports.MongoDB({
     },
     // A collection to save json formatted logs
     collection: 'server_logs_shopify',
+    tryReconnect: true,
     format: format.combine(
         format.timestamp(),
         // Convert logs to a json format

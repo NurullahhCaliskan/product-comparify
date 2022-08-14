@@ -1,12 +1,19 @@
 import ProductHistoryRepository from '../repository/productHistoryRepository.js';
-import _ from 'lodash';
 
 export default class ProductHistoryService {
     async getSameProductsByProduct(session, body) {
         let productHistoryRepository = new ProductHistoryRepository();
+
+        if (!body.productType) {
+            return { data: [], count: 0 };
+        }
+
         let data = await productHistoryRepository.getSameProductsByProduct(session.onlineAccessInfo.associated_user.storeId, body);
 
-        let count = await productHistoryRepository.getSameProductsByProductCount(session.onlineAccessInfo.associated_user.storeId, body);
-        return { data: data, count: _.get(count, '[0]') ? count[0].id : 0 };
+        if (data.length > 0) {
+            return { data: data, count: data[0].totalCount };
+        } else {
+            return { data: [], count: 0 };
+        }
     }
 }

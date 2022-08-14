@@ -25,6 +25,7 @@ export function HomePage() {
 
     const handleFrameIndex = (value) => {
         setFrameIndex(value);
+        setMobileNavigationActive(false);
     };
 
     const navigationMarkup = (

@@ -117,8 +117,6 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     });
 
     app.post('/merchant-products', verifyRequest(app), async (req, res) => {
-        collections.productHistoryModel.createIndex({ vendor: 1 }, { collation: { locale: 'en', strength: 2 } });
-
         let merchantsProductsService = new MerchantsProductsService();
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
@@ -129,7 +127,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(200).send(JSON.stringify(products));
         } catch (e) {
             logger.error([__filename, e].join(' '));
-            return res.status(401).send();
+            return res.status(422).send();
         }
     });
 
@@ -143,7 +141,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(200).send(JSON.stringify(products));
         } catch (e) {
             logger.error([__filename, e].join(' '));
-            return res.status(401).send();
+            return res.status(422).send();
         }
     });
 
@@ -159,7 +157,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             if (error.response) {
                 return res.status(error.response.status).send(error.response.data);
             }
-            return res.status(500).send(JSON.stringify({ result: 'Something went wrong. Please try again' }));
+            return res.status(422).send(JSON.stringify({ result: 'Something went wrong. Please try again' }));
         }
     });
 
@@ -174,6 +172,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             await contactSupportService.saveContactSupportService(session.onlineAccessInfo.associated_user.storeId, body.subject, body.message, body.topic);
         } catch (e) {
             logger.error([__filename, e].join(' '));
+            return res.status(422).send(JSON.stringify({ data: 'Error' }));
         }
         return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
@@ -189,9 +188,8 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
             logger.error([__filename, e].join(' '));
+            return res.status(422).send(JSON.stringify({ data: 'Error' }));
         }
-
-        return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
 
     app.post('/search-test', verifyRequest(app), async (req, res) => {
@@ -205,9 +203,8 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(200).send(result);
         } catch (e) {
             logger.error([__filename, e].join(' '));
+            return res.status(422).send(JSON.stringify({ data: 'Error' }));
         }
-
-        return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
 
     app.post('/dashboard-info', verifyRequest(app), async (req, res) => {
@@ -223,8 +220,8 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
             logger.error([__filename, e].join(' '));
+            return res.status(422).send(JSON.stringify({ data: 'Error' }));
         }
-        return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
     });
 
     app.post('/product-mail-history-info', verifyRequest(app), async (req, res) => {
@@ -240,19 +237,8 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             return res.status(200).send(JSON.stringify(result));
         } catch (e) {
             logger.error([__filename, e].join(' '));
+            return res.status(422).send(JSON.stringify({ data: 'Error' }));
         }
-        return res.status(200).send(JSON.stringify({ data: 'New message inserted successfully' }));
-    });
-
-    app.post('/query/test', async (req, res) => {
-        try {
-            return res.status(200).send('asdsa');
-        } catch (e) {
-            logger.error([__filename, e].join(' '));
-            return res.status(401).send();
-        }
-
-        return res.status(200).send();
     });
 
     app.post('/user-crawl-url', verifyRequest(app), async (req, res) => {

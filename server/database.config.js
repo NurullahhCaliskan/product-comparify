@@ -1,5 +1,6 @@
 import * as mongoDB from 'mongodb';
 import dotenv from 'dotenv';
+import setDbActive from './static/db.js';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -8,6 +9,15 @@ const client = new mongoDB.MongoClient(process.env.DBHOST);
 client.connect().then((r) => r);
 
 const db = client.db(process.env.DBNAME);
+client.on('open', () => {
+    console.log('open baby');
+    setDbActive(true);
+});
+
+client.on('topologyClosed', () => {
+    console.log('close baby');
+    setDbActive(false);
+});
 
 export let collections = {
     storeWebsitesRelationModel: db.collection('store-websites-relation'),

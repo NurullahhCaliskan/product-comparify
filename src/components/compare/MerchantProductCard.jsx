@@ -6,7 +6,6 @@ import _ from 'lodash';
 import priceWithCurrency from '../../utility/currenctUtility.js';
 
 let pageInfo = { endCursor: null, hasNextPage: false, hasPreviousPage: false, startCursor: null };
-let clickedToRemoveFilter = false;
 let filterTimeout;
 export function MerchantProductCard(prop) {
     const app = useAppBridge();
@@ -19,7 +18,6 @@ export function MerchantProductCard(prop) {
     const [loadingUrl, setLoadingUrl] = useState(false);
 
     const handleQueryValueRemove = () => {
-        clickedToRemoveFilter = true;
         setQueryValue(null);
     };
 
@@ -52,23 +50,13 @@ export function MerchantProductCard(prop) {
 
     useEffect(async () => {
         pageInfo = Object.assign({}, { endCursor: null, hasNextPage: false, hasPreviousPage: false, startCursor: null });
-        await getMerchantsProducts();
-    }, []);
-
-    useEffect(async () => {
-        pageInfo = Object.assign({}, { endCursor: null, hasNextPage: false, hasPreviousPage: false, startCursor: null });
-        if (clickedToRemoveFilter) {
-            await getMerchantsProducts();
-        }
-        clickedToRemoveFilter = false;
 
         doFilter(queryValue);
     }, [queryValue]);
 
     const doFilter = (query) => {
-        setQueryValue(query);
+        //setQueryValue(query);
         clearTimeout(filterTimeout);
-        if (!query) return;
 
         filterTimeout = setTimeout(async () => {
             await getMerchantsProducts();
