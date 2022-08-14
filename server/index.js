@@ -26,6 +26,7 @@ import StoreService from './service/storeService.js';
 import MerchantsProductsService from './service/merchantsProducts.js';
 import ProductHistoryService from './service/ProductHistoryService.js';
 import { logger } from './utility/logUtility.js';
+import { __filename } from './static/paths.js';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
