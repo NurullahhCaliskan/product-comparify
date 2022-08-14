@@ -23,6 +23,10 @@ export function Compare() {
         setSelectedCompetitorsProduct(item);
     };
 
+    const resetCompetitorsProduct = async () => {
+        setSelectedCompetitorsProduct(null);
+    };
+
     return (
         <Page
             compactTitle
@@ -54,9 +58,9 @@ export function Compare() {
                     <MerchantProductCard selectProduct={(item) => selectMerchantProduct(item)} />
                 </Layout.Section>
                 <Layout.Section secondary>
-                    <CompetitorsProductsCard merchantProduct={selectedMerchantProduct} selectProduct={(item) => selectCompetitorsProduct(item)} />
+                    <CompetitorsProductsCard merchantProduct={selectedMerchantProduct} selectProduct={(item) => selectCompetitorsProduct(item)} competitorsProduct={selectedCompetitorsProduct} />
                 </Layout.Section>
-                <CompareModal merchantProduct={selectedMerchantProduct} competitorsProduct={selectedCompetitorsProduct} />
+                <CompareModal merchantProduct={selectedMerchantProduct} competitorsProduct={selectedCompetitorsProduct} resetCompetitorsProduct={() => resetCompetitorsProduct()} />
             </Layout>
         </Page>
     );

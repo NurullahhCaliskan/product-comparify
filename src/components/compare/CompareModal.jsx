@@ -11,7 +11,10 @@ export function CompareModal(props) {
     const [merchantProduct, setMerchantProduct] = useState({});
     const [competitorsProduct, setCompetitorsProduct] = useState({});
 
-    const handleChange = useCallback(() => setActive(!active), [active]);
+    const handleChange = useCallback(() => {
+        props.resetCompetitorsProduct();
+        setActive(!active);
+    }, [active]);
 
     const defaultObject = { id: null, handle: null, title: null, images: [], createdAt: null, publishedAt: null, updatedAt: null, variants: [], productType: null, tags: [], vendor: null, mainImage: 'https://polaris.shopify.com/icons/DomainsMajor.svg', variantList: [] };
 
@@ -95,6 +98,9 @@ export function CompareModal(props) {
     };
 
     useEffect(async () => {
+        if (!props.merchantProduct) {
+            return;
+        }
         let data = props.merchantProduct.node.variants.edges[selectedMerchantVariantOption].node;
 
         let result = {};
@@ -111,13 +117,13 @@ export function CompareModal(props) {
         result.weightUnit = data.weightUnit;
         result.currency = props.merchantProduct.node.priceRangeV2.maxVariantPrice.currencyCode;
 
-        console.log('merchantProduct');
-        console.log(result);
         setSelectedMerchantVariant(result);
     }, [selectedMerchantVariantOption, props.merchantProduct]);
 
     useEffect(async () => {
-        console.log(props.competitorsProduct);
+        if (!props.competitorsProduct) {
+            return;
+        }
 
         let data = props.competitorsProduct.variants[selectedCompetitorVariantOption];
 
@@ -134,8 +140,6 @@ export function CompareModal(props) {
         result.weightUnit = 'gram';
         result.currency = props.competitorsProduct.currency;
 
-        console.log('competitorsProduct');
-        console.log(result);
         setSelectedCompetitorVariant(result);
     }, [selectedCompetitorVariantOption, props.competitorsProduct]);
 
@@ -151,9 +155,6 @@ export function CompareModal(props) {
         if (props.competitorsProduct) {
             loadCompetitorsData();
         }
-
-        console.log(props.merchantProduct);
-        console.log(props.competitorsProduct);
     }, [props.merchantProduct, props.competitorsProduct]);
 
     return (
