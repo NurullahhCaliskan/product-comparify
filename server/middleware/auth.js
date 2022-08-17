@@ -65,7 +65,7 @@ export default function applyAuthMiddleware(app) {
                 let sessionService = new SessionService();
                 await sessionService.saveSession(clientResponse.body.shop, session);
             } catch (e) {
-                //logger.error([__filename, 'auth error', e, 'session:', JSON.stringify(session)].join(' '));
+                logger.error([__filename, 'auth error', e, 'session:', JSON.stringify(session)].join(' '));
             }
             // Redirect to app with shop parameter upon auth
             res.redirect(`/?shop=${session.shop}&host=${host}`);
