@@ -3,6 +3,8 @@ import { Shopify } from '@shopify/shopify-api';
 import topLevelAuthRedirect from '../helpers/top-level-auth-redirect.js';
 import SessionService from '../service/sessionService.js';
 import { MongoTopologyClosedError } from 'mongodb';
+import { logger } from '../utility/logUtility.js';
+import { __filename } from '../static/paths.js';
 
 export default function applyAuthMiddleware(app) {
     app.get('/auth', async (req, res) => {
@@ -38,13 +40,6 @@ export default function applyAuthMiddleware(app) {
         try {
             const session = await Shopify.Auth.validateAuthCallback(req, res, req.query);
 
-            const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
-
-            const clientResponse = await client.get({ path: 'shop' });
-
-            let sessionService = new SessionService();
-            await sessionService.saveSession(clientResponse.body.shop, session);
-
             const host = req.query.host;
             app.set(
                 'active-shopify-shops',
@@ -64,6 +59,14 @@ export default function applyAuthMiddleware(app) {
                 console.log(`Failed to register APP_UNINSTALLED webhook: ${response.result}`);
             }
 
+            try {
+                const client = await new Shopify.Clients.Rest(session.shop, session.accessToken);
+                const clientResponse = await client.get({ path: 'shop' });
+                let sessionService = new SessionService();
+                await sessionService.saveSession(clientResponse.body.shop, session);
+            } catch (e) {
+                //logger.error([__filename, 'auth error', e, 'session:', JSON.stringify(session)].join(' '));
+            }
             // Redirect to app with shop parameter upon auth
             res.redirect(`/?shop=${session.shop}&host=${host}`);
         } catch (e) {

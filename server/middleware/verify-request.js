@@ -13,19 +13,11 @@ const TEST_GRAPHQL_QUERY = `
   }
 }`;
 
-const resDotSendInterceptor = (res, send) => (content) => {
-    res.contentBody = content;
-    res.send = send;
-    res.send(content);
-};
-
 export default function verifyRequest(app, { returnHeader = true } = {}) {
     return async (req, res, next) => {
         let logHistoryService = new LogHistoryService();
         const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
         const requestStart = Date.now();
-
-        res.send = resDotSendInterceptor(res, res.send);
 
         if (!dbActive) {
             return res.status(503).send('Service Unavailable');
@@ -102,7 +94,7 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
 
             res.status(403);
             res.header('X-Shopify-API-Request-Failure-Reauthorize', '1');
-            res.header('X-Shopify-API-Request-Failure-Reauthorize-AddStore', `/auth?shop=${shop}`);
+            res.header('X-Shopify-API-Request-Failure-Reauthorize-Url', `/auth?shop=${shop}`);
             res.end();
         } else {
             res.redirect(`/auth?shop=${shop}`);

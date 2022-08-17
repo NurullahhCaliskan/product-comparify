@@ -16,3 +16,5 @@ logs
 # ngrok tunnel file
 config/tunnel.pid
 
+
+.env
