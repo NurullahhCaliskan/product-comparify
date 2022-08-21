@@ -12,7 +12,6 @@ import MailValidator from './validate/mailValidator.js';
 import MailService from './service/mailService.js';
 import IsNotValidUrlException from './exception/isNotValidUrlException.js';
 import { urlFormatter } from './utility/stringUtility.js';
-import { collections } from './database.config.js';
 import ContactSupportService from './service/contactSupportService.js';
 import MailHistoryService from './service/mailHistoryService.js';
 import verifyWebhook from 'verify-shopify-webhook';
@@ -251,7 +250,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
-            await scrapService.checkValidShopifyUrl(body.url);
+            body.url = await scrapService.checkValidShopifyUrl(body.url);
 
             let productHistoryCrawlerQueueService = new ProductHistoryCrawlerQueueService();
             await urlToScrapService.isExistsUserToUrlRelation(body.url, session.onlineAccessInfo.associated_user.storeId);
