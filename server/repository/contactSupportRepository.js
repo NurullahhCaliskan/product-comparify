@@ -4,13 +4,13 @@ export default class ContactSupportRepository {
     /***
      * save contact
      * @param userId
-     * @param subject
+     * @param email
      * @param message
      * @param topic
      * @return {Promise<void>}
      */
-    async saveContactRepository(userId, subject, message, topic) {
-        let resultJson = { userId: userId, subject: subject, message: message, topic: topic, create_date_time: new Date() };
+    async saveContactRepository(userId, email, message, topic) {
+        let resultJson = { userId: userId, email: email, message: message, topic: topic, create_date_time: new Date() };
 
         await collections.contactSupportModel
             .insertOne(resultJson)

@@ -54,7 +54,7 @@ export function ContactUs() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    subject: emailMessage,
+                    email: emailMessage,
                     topic: selected,
                     message: supportMessage,
                 }),
