@@ -10,7 +10,7 @@ client.connect().then((r) => r);
 
 const db = client.db(process.env.DBNAME);
 client.on('open', () => {
-    console.log('open baby');
+    console.log(process.env.MAILNAME);
     setDbActive(true);
 });
 
