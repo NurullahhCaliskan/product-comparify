@@ -5,6 +5,7 @@ import { ApiVersion, Shopify } from '@shopify/shopify-api';
 import ScrapValidator from './validate/scrapValidator.js';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { mailService } from './mail.service.js';
 import applyAuthMiddleware from './middleware/auth.js';
 import verifyRequest from './middleware/verify-request.js';
 import UrlToScrapService from './service/urlToScrapService.js';
@@ -26,6 +27,8 @@ import MerchantsProductsService from './service/merchantsProducts.js';
 import ProductHistoryService from './service/ProductHistoryService.js';
 import { logger } from './utility/logUtility.js';
 import { __filename } from './static/paths.js';
+import nodemailer from 'nodemailer';
+import ContactUsMail from './mail/contactUsMail.js';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
@@ -34,6 +37,22 @@ const TOP_LEVEL_OAUTH_COOKIE = 'shopify_top_level_oauth';
 
 const PORT = parseInt(process.env.PORT || '8081', 10);
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITE_TEST_BUILD;
+
+//initialize mail engine
+function initializeMailEngine() {
+    // Generate test SMTP service account from ethereal.email
+    // Only needed if you don't have a real mail account for testing
+    // create reusable transporter object using the default SMTP transport
+    mailService.service = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.MAILNAME,
+            pass: process.env.MAILPW,
+        },
+    });
+}
+
+initializeMailEngine();
 
 Shopify.Context.initialize({
     API_KEY: process.env.SHOPIFY_API_KEY,
@@ -169,7 +188,13 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
 
             let contactSupportService = new ContactSupportService();
 
-            await contactSupportService.saveContactSupportService(session.onlineAccessInfo.associated_user.storeId, body.subject, body.message, body.topic);
+            await contactSupportService.saveContactSupportService(session.onlineAccessInfo.associated_user.storeId, body.email, body.message, body.topic);
+
+            try {
+                let contactUsMail = new ContactUsMail();
+                await contactUsMail.getMailResult({ storeId: session.onlineAccessInfo.associated_user.storeId, email: body.email, message: body.message, topic: body.topic });
+            } catch (e) {}
+            //send mail to product comparify
         } catch (e) {
             logger.error([__filename, e].join(' '));
             return res.status(422).send(JSON.stringify({ data: 'Error' }));

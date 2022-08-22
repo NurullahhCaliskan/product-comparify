@@ -4,13 +4,13 @@ export default class ContactSupportService {
     /***
      * save contact
      * @param userId
-     * @param subject
+     * @param email
      * @param message
      * @param topic
      * @return {Promise<void>}
      */
-    async saveContactSupportService(userId, subject, message, topic) {
+    async saveContactSupportService(userId, email, message, topic) {
         let contactSupportRepository = new ContactSupportRepository();
-        await contactSupportRepository.saveContactRepository(userId, subject, message, topic);
+        await contactSupportRepository.saveContactRepository(userId, email, message, topic);
     }
 }
