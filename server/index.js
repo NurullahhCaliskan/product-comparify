@@ -193,7 +193,9 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
             try {
                 let contactUsMail = new ContactUsMail();
                 await contactUsMail.getMailResult({ storeId: session.onlineAccessInfo.associated_user.storeId, email: body.email, message: body.message, topic: body.topic });
-            } catch (e) {}
+            } catch (e) {
+                console.log(e);
+            }
             //send mail to product comparify
         } catch (e) {
             logger.error([__filename, e].join(' '));
