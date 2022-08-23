@@ -27,4 +27,22 @@ export default class StoreRepository {
 
         return await collections.storeUserModel?.aggregate(json).toArray();
     }
+
+    /***
+     * move all store user to uninstall store user
+     * @param storeId storeid
+     * @return {Promise<void>}
+     */
+    async uninstallStoreByStoreId(storeId) {
+        await collections.storeModel
+            .aggregate([{ $match: { id: storeId } }, { $out: 'uninstall-store' }])
+            .toArray()
+            .then((r) => r)
+            .catch((e) => {});
+
+        await collections.storeModel
+            .deleteMany({ id: storeId })
+            .then((r) => r)
+            .catch((e) => {});
+    }
 }

@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import { mailService } from './mail.service.js';
 import applyAuthMiddleware from './middleware/auth.js';
 import verifyRequest from './middleware/verify-request.js';
-import UrlToScrapService from './service/urlToScrapService.js';
+import StoreWebsiteRelationService from './service/storeWebsiteRelationService.js';
 import MailValidator from './validate/mailValidator.js';
 import MailService from './service/mailService.js';
 import IsNotValidUrlException from './exception/isNotValidUrlException.js';
@@ -71,6 +71,12 @@ const ACTIVE_SHOPIFY_SHOPS = {};
 Shopify.Webhooks.Registry.addHandler('APP_UNINSTALLED', {
     path: '/webhooks',
     webhookHandler: async (topic, shop, body) => {
+        let storeService = new StoreService();
+        try {
+            await storeService.uninstallStore(body);
+        } catch (e) {
+            logger.error([__filename, 'verify hook error', e].join(' '));
+        }
         delete ACTIVE_SHOPIFY_SHOPS[shop];
     },
 });
@@ -272,7 +278,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
         let body = req.body;
         body.url = urlFormatter(body.url);
         let scrapService = new ScrapValidator();
-        let urlToScrapService = new UrlToScrapService();
+        let urlToScrapService = new StoreWebsiteRelationService();
 
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
@@ -299,7 +305,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     app.put('/user-crawl-url', verifyRequest(app), async (req, res) => {
         let body = req.body;
 
-        let urlToScrapService = new UrlToScrapService();
+        let urlToScrapService = new StoreWebsiteRelationService();
         try {
             let scrapService = new ScrapValidator();
             await scrapService.checkValidShopifyUrl(body.url);
@@ -333,7 +339,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     app.post('/user-crawl-url-delete', verifyRequest(app), async (req, res) => {
         let body = req.body;
         try {
-            let urlToScrapService = new UrlToScrapService();
+            let urlToScrapService = new StoreWebsiteRelationService();
 
             let deletedArray = body.urls;
             for (const item of deletedArray) {
@@ -379,7 +385,7 @@ export async function createServer(root = process.cwd(), isProd = process.env.NO
     app.get('/user-crawl-url', verifyRequest(app), async (req, res) => {
         const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
 
-        let urlToScrapService = new UrlToScrapService();
+        let urlToScrapService = new StoreWebsiteRelationService();
         let data = await urlToScrapService.getUrlToScrapService(session.onlineAccessInfo.associated_user.storeId);
         return res.status(200).send(JSON.stringify(data));
     });

@@ -1,7 +1,7 @@
-import UrlToScrapRepository from '../repository/urlToScrapRepository.js';
+import StoreWebsiteRelationRepository from '../repository/storeWebsiteRelationRepository.js';
 import { urlFormatter } from '../utility/stringUtility.js';
 
-export default class UrlToScrapService {
+export default class StoreWebsiteRelationService {
     /***
      * add url to scrap service
      * @param url url
@@ -9,7 +9,7 @@ export default class UrlToScrapService {
      */
     async addUrlToScrapService(url, storeId) {
         url = urlFormatter(url);
-        let urlToScrapRepository = new UrlToScrapRepository();
+        let urlToScrapRepository = new StoreWebsiteRelationRepository();
         await urlToScrapRepository.addUrlToScrapRepository(url, storeId);
     }
 
@@ -19,7 +19,7 @@ export default class UrlToScrapService {
      * @param storeId storeId
      */
     async updateUrl(body, storeId) {
-        let urlToScrapRepository = new UrlToScrapRepository();
+        let urlToScrapRepository = new StoreWebsiteRelationRepository();
         await urlToScrapRepository.upsertUrlRepository(body, storeId);
     }
 
@@ -29,7 +29,7 @@ export default class UrlToScrapService {
      * @return {Promise<void>}
      */
     async deleteUrlToScrapService(id) {
-        let urlToScrapRepository = new UrlToScrapRepository();
+        let urlToScrapRepository = new StoreWebsiteRelationRepository();
         await urlToScrapRepository.deleteUrlToScrapRepository(id);
     }
 
@@ -41,7 +41,7 @@ export default class UrlToScrapService {
      */
     async isExistsUserToUrlRelation(url, storeId) {
         url = urlFormatter(url);
-        let urlToScrapRepository = new UrlToScrapRepository();
+        let urlToScrapRepository = new StoreWebsiteRelationRepository();
         await urlToScrapRepository.isExistsUserToUrlRelation(url, storeId);
     }
 
@@ -51,7 +51,7 @@ export default class UrlToScrapService {
      * @return {Promise<void>}
      */
     async storeMaximumLimitCheck(storeId) {
-        let urlToScrapRepository = new UrlToScrapRepository();
+        let urlToScrapRepository = new StoreWebsiteRelationRepository();
         await urlToScrapRepository.storeMaximumLimitCheck(storeId);
     }
 
@@ -61,7 +61,12 @@ export default class UrlToScrapService {
      * @return {Promise<undefined|*|[]>}
      */
     async getUrlToScrapService(storeId) {
-        let urlToScrapRepository = new UrlToScrapRepository();
+        let urlToScrapRepository = new StoreWebsiteRelationRepository();
         return await urlToScrapRepository.getUserToUrlRelation(storeId);
+    }
+
+    async uninstallStoreByStoreId(storeId) {
+        let urlToScrapRepository = new StoreWebsiteRelationRepository();
+        await urlToScrapRepository.uninstallStoreByStoreId(storeId);
     }
 }

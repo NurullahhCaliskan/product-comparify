@@ -5,7 +5,7 @@ import { urlFormatter } from '../utility/stringUtility.js';
 import { collections } from '../database.config.js';
 import WebsiteService from '../service/websiteService.js';
 
-export default class UrlToScrapRepository {
+export default class StoreWebsiteRelationRepository {
     /***
      * delete user's url
      * @param id id
@@ -172,5 +172,23 @@ export default class UrlToScrapRepository {
         }));
 
         return newArrayOfObj;
+    }
+
+    /***
+     * move all store user to uninstall store user
+     * @param storeId storeid
+     * @return {Promise<void>}
+     */
+    async uninstallStoreByStoreId(storeId) {
+        await collections.storeWebsitesRelationModel
+            .aggregate([{ $match: { storeId: storeId } }, { $out: 'uninstall-store-websites-relation' }])
+            .toArray()
+            .then((r) => r)
+            .catch((e) => {});
+
+        await collections.storeWebsitesRelationModel
+            .deleteMany({ storeId: storeId })
+            .then((r) => r)
+            .catch((e) => {});
     }
 }

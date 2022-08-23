@@ -1,4 +1,6 @@
 import StoreRepository from '../repository/storeRepository.js';
+import StoreUserService from './storeUserService.js';
+import StoreWebsiteRelationService from './storeWebsiteRelationService.js';
 
 export default class StoreService {
     /***
@@ -24,5 +26,21 @@ export default class StoreService {
         } catch (e) {
             return {};
         }
+    }
+
+    /***
+     * uninstall merchant
+     * @param store store
+     * @return {Promise<void>}
+     */
+    async uninstallStore(store) {
+        let storeUserService = new StoreUserService();
+        let storeRepository = new StoreRepository();
+        let storeWebsiteRelationService = new StoreWebsiteRelationService();
+        let storeId = JSON.parse(store).id;
+
+        await storeUserService.uninstallStoreUserByStoreId(storeId);
+        await storeRepository.uninstallStoreByStoreId(storeId);
+        await storeWebsiteRelationService.uninstallStoreByStoreId(storeId);
     }
 }

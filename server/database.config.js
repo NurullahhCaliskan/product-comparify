@@ -31,4 +31,7 @@ export let collections = {
     storeUserModel: db.collection('store-user'),
     productMailHistoryModel: db.collection('product-mail-history'),
     logHistoryModel: db.collection('log-history'),
+    uninstallStoreWebsiteRelationModel: db.collection('uninstall-store-websites-relation'),
+    uninstallStoreModel: db.collection('uninstall-store'),
+    uninstallStoreUserModel: db.collection('uninstall-store-user'),
 };
